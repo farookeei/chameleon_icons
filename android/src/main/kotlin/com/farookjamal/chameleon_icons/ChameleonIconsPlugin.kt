@@ -65,7 +65,7 @@ class ChameleonIconsPlugin :
 
             "changeIcon" -> {
                 val targetIcon = call.argument<String>("targetIcon")
-
+                val _packageManager: PackageManager = context.packageManager
                 if (targetIcon == null) {
                     result.error("INVALID_ARGS", "targetIcon cannot be null", null)
                     return
@@ -97,7 +97,7 @@ class ChameleonIconsPlugin :
                     Log.v(TAG, "$packageName.$targetIcon:ENABLED")
                     for (activityInfo in allActivities) {
                         if (activityInfo.name != targetActivity && !activityInfo.name.endsWith(".MainActivity")) {
-                            context.packageManager.setComponentEnabledSetting(
+                            _packageManager.setComponentEnabledSetting(
                                 ComponentName(packageName, activityInfo.name),
                                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                                 PackageManager.DONT_KILL_APP
@@ -105,7 +105,11 @@ class ChameleonIconsPlugin :
                             Log.d(TAG, "$activityInfo.name:DISABLED")
                         }
                     }
+
+
                     result.success(true)
+
+
 
                 } catch (e: Exception) {
                     result.error("CHANGE_ICON_FAILED", e.localizedMessage, null)
