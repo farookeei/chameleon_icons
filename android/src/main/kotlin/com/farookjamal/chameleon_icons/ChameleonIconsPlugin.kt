@@ -64,11 +64,9 @@ class ChameleonIconsPlugin :
             }
 
             "changeIcon" -> {
-                Log.d(TAG,"changeIcon function called")
                 val targetIcon = call.argument<String>("targetIcon")
 
                 if (targetIcon == null) {
-                    Log.e(TAG,"targetIcon is null")
                     result.error("INVALID_ARGS", "targetIcon cannot be null", null)
                     return
                 }
@@ -88,32 +86,30 @@ class ChameleonIconsPlugin :
                         packageInfo = context.packageManager.getPackageInfo(packageName, flags)
                     }
                     val allActivities = packageInfo.activities ?: emptyArray()
-                    Log.d(TAG,"allActivities: $allActivities")
+                    //enabling the desired class
+                    val targetActivity = "$packageName.$targetIcon";
+                    val component = ComponentName(packageName, targetActivity)
+                    context.packageManager.setComponentEnabledSetting(
+                        component,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP
+                    )
+                    Log.v(TAG, "$packageName.$targetIcon:ENABLED")
                     for (activityInfo in allActivities) {
-                        val component = ComponentName(packageName, activityInfo.name)
-                        if (activityInfo.name.contains(targetIcon)) {
+                        if (activityInfo.name != targetActivity && !activityInfo.name.endsWith(".MainActivity")) {
                             context.packageManager.setComponentEnabledSetting(
-                                component,
-                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                                PackageManager.DONT_KILL_APP
-                            )
-                        } else {
-                            context.packageManager.setComponentEnabledSetting(
-                                component,
+                                ComponentName(packageName, activityInfo.name),
                                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                                 PackageManager.DONT_KILL_APP
                             )
+                            Log.d(TAG, "$activityInfo.name:DISABLED")
                         }
-
-
                     }
-//                result.success("to be implemented")
+                    result.success(true)
 
                 } catch (e: Exception) {
                     result.error("CHANGE_ICON_FAILED", e.localizedMessage, null)
                 }
-
-
             }
 
             else -> result.notImplemented()
