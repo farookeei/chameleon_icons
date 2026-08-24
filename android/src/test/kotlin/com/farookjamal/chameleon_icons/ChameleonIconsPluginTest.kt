@@ -15,13 +15,51 @@ import kotlin.test.Test
 
 internal class ChameleonIconsPluginTest {
     @Test
-    fun onMethodCall_getPlatformVersion_returnsExpectedValue() {
+    fun onMethodCall_getPlatformVersion_returnsError() {
         val plugin = ChameleonIconsPlugin()
-
         val call = MethodCall("getPlatformVersion", null)
         val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
         plugin.onMethodCall(call, mockResult)
 
         Mockito.verify(mockResult).success("Android " + android.os.Build.VERSION.RELEASE)
     }
+
+    @Test
+    fun onMethodCall_changeIcon_returnsError() {
+        val plugin = ChameleonIconsPlugin()
+        val call = MethodCall("changeIcon", null)
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+        plugin.onMethodCall(call, mockResult)
+
+        Mockito.verify(mockResult).error(
+            Mockito.eq("INVALID_ARGS"),
+            Mockito.eq("targetIcon cannot be null"),
+            Mockito.isNull()
+        )
+    }
+
+    @Test
+    fun onMethodCall_getCurrentIconClassName_returnsError() {
+        val plugin = ChameleonIconsPlugin()
+        val call = MethodCall("getCurrentIconClassName", null)
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+        plugin.onMethodCall(call, mockResult)
+
+        Mockito.verify(mockResult).error(
+            Mockito.eq("ERROR"),
+            Mockito.eq("Failed to get the current icon class name"),
+            Mockito.isNull()
+        )
+    }
+
+    @Test
+    fun onMethodCall_unknownMethod_returnsNotImplemented() {
+        val plugin = ChameleonIconsPlugin()
+        val call = MethodCall("unknownMethod", null)
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+
+        plugin.onMethodCall(call, mockResult)
+        Mockito.verify(mockResult).notImplemented()
+    }
+
 }
