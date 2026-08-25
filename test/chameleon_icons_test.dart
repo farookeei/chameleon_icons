@@ -9,10 +9,23 @@ class MockChameleonIconsPlatform
     implements ChameleonIconsPlatform {
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<void> changeIcon(String targetIconClassName) {
+    // TODO: implement changeIcon
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> getCurrentIconClassName() {
+    // TODO: implement getCurrentIconClassName
+    throw UnimplementedError();
+  }
 }
 
 void main() {
-  final ChameleonIconsPlatform initialPlatform = ChameleonIconsPlatform.instance;
+  final ChameleonIconsPlatform initialPlatform =
+      ChameleonIconsPlatform.instance;
 
   test('$MethodChannelChameleonIcons is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelChameleonIcons>());
