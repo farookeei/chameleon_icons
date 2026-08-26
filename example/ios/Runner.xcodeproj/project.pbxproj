@@ -16,6 +16,10 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		B2C83BD8303DC0A700456CEB /* gold_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B2C83BD6303DC0A600456CEB /* gold_icon@2x.png */; };
+		B2C83BD9303DC0A700456CEB /* dark_icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = B2C83BD5303DC0A600456CEB /* dark_icon@3x.png */; };
+		B2C83BDA303DC0A700456CEB /* dark_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B2C83BD4303DC0A600456CEB /* dark_icon@2x.png */; };
+		B2C83BDB303DC0A700456CEB /* gold_icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = B2C83BD7303DC0A600456CEB /* gold_icon@3x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +65,10 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B2C83BD4303DC0A600456CEB /* dark_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dark_icon@2x.png"; sourceTree = "<group>"; };
+		B2C83BD5303DC0A600456CEB /* dark_icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dark_icon@3x.png"; sourceTree = "<group>"; };
+		B2C83BD6303DC0A600456CEB /* gold_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gold_icon@2x.png"; sourceTree = "<group>"; };
+		B2C83BD7303DC0A600456CEB /* gold_icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gold_icon@3x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +127,10 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				B2C83BD4303DC0A600456CEB /* dark_icon@2x.png */,
+				B2C83BD5303DC0A600456CEB /* dark_icon@3x.png */,
+				B2C83BD6303DC0A600456CEB /* gold_icon@2x.png */,
+				B2C83BD7303DC0A600456CEB /* gold_icon@3x.png */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -232,6 +244,10 @@
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
+				B2C83BD8303DC0A700456CEB /* gold_icon@2x.png in Resources */,
+				B2C83BD9303DC0A700456CEB /* dark_icon@3x.png in Resources */,
+				B2C83BDA303DC0A700456CEB /* dark_icon@2x.png in Resources */,
+				B2C83BDB303DC0A700456CEB /* gold_icon@3x.png in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

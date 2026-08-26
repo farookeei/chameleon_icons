@@ -18,21 +18,17 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
             result(currentIcon)
             
         case "changeIcon":
-            let args = call.arguments as? [String:Any]
-            //passing nil to setAlternateIconName changes it back to the original app icon
+            let args = call.arguments as? [String: Any]
             let targetIcon = args?["targetIcon"] as? String
-            
-            
-            guard UIApplication.shared.supportsAlternateIcons else{
-                // If the device does not support dynamic icons (e.g. some iPads/old iOS):
-                return  result (FlutterError(code: "UNSUPPORTED", message: "Alternate icons is not supported in this device", details: nil))
+            guard UIApplication.shared.supportsAlternateIcons else {
+                return result(FlutterError(code: "UNSUPPORTED", message: "Alternate icons not supported", details: nil))
             }
-            
-            UIApplication.shared.setAlternateIconName(targetIcon) {
-                error in
-                if let error = error{
-                    result (FlutterError(code: "CHANGE_ICON_FAILED", message: error.localizedDescription, details:nil))
-                }else{
+            // If it's the default icon name, convert it to nil for Apple's API:
+            let iconNameToSet = (targetIcon == "MainActivityDefault" || targetIcon == "default" || targetIcon == nil) ? nil : targetIcon
+            UIApplication.shared.setAlternateIconName(iconNameToSet) { error in
+                if let error = error {
+                    result(FlutterError(code: "CHANGE_ICON_FAILED", message: error.localizedDescription, details: nil))
+                } else {
                     result(true)
                 }
             }
