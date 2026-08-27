@@ -17,7 +17,7 @@ class MockChameleonIconsPlatform
   }
 
   @override
-  Future<String?> getCurrentIconClassName() {
+  Future<void> resetIcon() {
     // TODO: implement getCurrentIconClassName
     throw UnimplementedError();
   }

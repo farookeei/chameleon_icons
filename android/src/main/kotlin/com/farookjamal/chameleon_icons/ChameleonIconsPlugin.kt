@@ -14,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 private const val TAG = "ChameleonIcons"
+private const val DEFAULT_ICON_ALIAS_META = "com.farookjamal.chameleon_icons.DEFAULT_ICON_ALIAS"
 
 /** ChameleonIconsPlugin */
 class ChameleonIconsPlugin :
@@ -40,79 +41,51 @@ class ChameleonIconsPlugin :
     ) {
         when (call.method) {
             "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
-            "getCurrentIconClassName" -> {
-                try {
-                    val intent = Intent(Intent.ACTION_MAIN).apply {
-                        addCategory(Intent.CATEGORY_LAUNCHER)
-                        setPackage(packageName)
-                    }
-                    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        context.packageManager.resolveActivity(
-                            intent,
-                            PackageManager.ResolveInfoFlags.of(0)
-                        )
-                    } else {
-                        @Suppress("DEPRECATION")
-                        context.packageManager.resolveActivity(intent, 0)
-                    }
-                    val currentActivityClassName = resolveInfo?.activityInfo?.name
-
-                    result.success(currentActivityClassName)
-                } catch (e: Exception) {
-                    result.error("ERROR", "Failed to get the current icon class name", null)
-                }
-            }
+            //not used currently
+//            "getCurrentIconClassName" -> {
+//                try {
+//                    val intent = Intent(Intent.ACTION_MAIN).apply {
+//                        addCategory(Intent.CATEGORY_LAUNCHER)
+//                        setPackage(packageName)
+//                    }
+//                    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                        context.packageManager.resolveActivity(
+//                            intent,
+//                            PackageManager.ResolveInfoFlags.of(0)
+//                        )
+//                    } else {
+//                        @Suppress("DEPRECATION")
+//                        context.packageManager.resolveActivity(intent, 0)
+//                    }
+//                    val currentActivityClassName = resolveInfo?.activityInfo?.name
+//
+//                    result.success(currentActivityClassName)
+//                } catch (e: Exception) {
+//                    result.error("ERROR", "Failed to get the current icon class name", null)
+//                }
+//            }
 
             "changeIcon" -> {
                 val targetIcon = call.argument<String>("targetIcon")
-                val _packageManager: PackageManager = context.packageManager
                 if (targetIcon == null) {
                     result.error("INVALID_ARGS", "targetIcon cannot be null", null)
                     return
                 }
-
                 try {
-                    val flags =
-                        PackageManager.GET_ACTIVITIES or PackageManager.MATCH_DISABLED_COMPONENTS
-                    val packageInfo: PackageInfo
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        packageInfo = context.packageManager.getPackageInfo(
-                            packageName,
-                            PackageManager.PackageInfoFlags.of(flags.toLong())
-                        )
-                    } else {
-                        @Suppress("DEPRECATION")
-                        packageInfo = context.packageManager.getPackageInfo(packageName, flags)
-                    }
-                    val allActivities = packageInfo.activities ?: emptyArray()
-                    //enabling the desired class
-                    val targetActivity = "$packageName.$targetIcon";
-                    val component = ComponentName(packageName, targetActivity)
-                    context.packageManager.setComponentEnabledSetting(
-                        component,
-                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                        PackageManager.DONT_KILL_APP
-                    )
-                    Log.v(TAG, "$packageName.$targetIcon:ENABLED")
-                    for (activityInfo in allActivities) {
-                        if (activityInfo.name != targetActivity && !activityInfo.name.endsWith(".MainActivity")) {
-                            _packageManager.setComponentEnabledSetting(
-                                ComponentName(packageName, activityInfo.name),
-                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                                PackageManager.DONT_KILL_APP
-                            )
-                            Log.d(TAG, "$activityInfo.name:DISABLED")
-                        }
-                    }
-
-
+                    changeIconInternal(targetIcon)
                     result.success(true)
-
-
-
                 } catch (e: Exception) {
                     result.error("CHANGE_ICON_FAILED", e.localizedMessage, null)
+                }
+            }
+
+            "resetIcon" -> {
+                try {
+                    val defaultIconAlias = getDefaultIconAlias()
+                    changeIconInternal(defaultIconAlias)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("RESET_ICON_FAILED", e.message, e.localizedMessage)
                 }
             }
 
@@ -120,6 +93,79 @@ class ChameleonIconsPlugin :
         }
 
 
+    }
+
+
+
+    /**
+     * Enables the target alias and disables all other aliases.
+     */
+    private fun changeIconInternal(targetIcon: String) {
+        val packageManager: PackageManager = context.packageManager
+        val flags =
+            PackageManager.GET_ACTIVITIES or PackageManager.MATCH_DISABLED_COMPONENTS
+        val packageInfo: PackageInfo
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageInfo = context.packageManager.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(flags.toLong())
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo = context.packageManager.getPackageInfo(packageName, flags)
+        }
+        val allActivities = packageInfo.activities ?: emptyArray()
+        //enabling the desired class
+        val targetActivity = "$packageName.$targetIcon";
+        val component = ComponentName(packageName, targetActivity)
+        context.packageManager.setComponentEnabledSetting(
+            component,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
+        Log.v(TAG, "$packageName.$targetIcon:ENABLED")
+        for (activityInfo in allActivities) {
+            if (activityInfo.name != targetActivity && !activityInfo.name.endsWith(".MainActivity")) {
+                packageManager.setComponentEnabledSetting(
+                    ComponentName(packageName, activityInfo.name),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+                Log.d(TAG, "$activityInfo.name:DISABLED")
+            }
+        }
+
+
+    }
+
+    /**
+     * Retrieves the default icon alias name from AndroidManifest.xml metadata.
+     *
+     * Throws [IllegalStateException] if metadata is not configured.
+     */
+    private fun getDefaultIconAlias(): String {
+        return try {
+            val applicationInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getApplicationInfo(
+                    packageName, PackageManager.ApplicationInfoFlags.of(
+                        PackageManager.GET_META_DATA.toLong()
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+
+            }
+
+            applicationInfo.metaData.getString(DEFAULT_ICON_ALIAS_META)
+                ?: throw IllegalStateException(
+                    "Meta-data '$DEFAULT_ICON_ALIAS_META' not found in AndroidManifest.xml. " +
+                            "Please add: <meta-data android:name=\"$DEFAULT_ICON_ALIAS_META\" android:value=\"YourDefaultAliasName\" />"
+                )
+        } catch (e: PackageManager.NameNotFoundException) {
+            throw IllegalStateException("Application meta-data could not be retrieved", e)
+        }
     }
 
 

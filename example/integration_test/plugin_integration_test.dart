@@ -22,23 +22,23 @@ void main() {
     expect(version?.isNotEmpty, true);
   });
 
-  testWidgets('icon change from default to dark', (WidgetTester tester) async {
-    final ChameleonIcons plugin = ChameleonIcons();
+  // testWidgets('icon change from default to dark', (WidgetTester tester) async {
+  //   final ChameleonIcons plugin = ChameleonIcons();
 
-    await plugin.changeIcon("MainActivityDark");
+  //   await plugin.changeIcon("MainActivityDark");
 
-    final String? currentIcon = await plugin.getCurrentIconClassName();
+  //   final String? currentIcon = await plugin.getCurrentIconClassName();
 
-    expect(currentIcon?.endsWith("MainActivityDark"), true);
-  });
+  //   expect(currentIcon?.endsWith("MainActivityDark"), true);
+  // });
 
-  testWidgets('icon change from default to gold', (WidgetTester tester) async {
-    final ChameleonIcons plugin = ChameleonIcons();
+  // testWidgets('icon change from default to gold', (WidgetTester tester) async {
+  //   final ChameleonIcons plugin = ChameleonIcons();
 
-    await plugin.changeIcon("MainActivityGold");
+  //   await plugin.changeIcon("MainActivityGold");
 
-    final String? currentIcon = await plugin.getCurrentIconClassName();
+  //   final String? currentIcon = await plugin.getCurrentIconClassName();
 
-    expect(currentIcon?.endsWith("MainActivity"), true);
-  });
+  //   expect(currentIcon?.endsWith("MainActivity"), true);
+  // });
 }

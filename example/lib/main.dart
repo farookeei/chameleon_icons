@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    getCurrentIconClassName();
+    // getCurrentIconClassName();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -51,21 +51,21 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> getCurrentIconClassName() async {
-    final icon = await _chameleonIconsPlugin.getCurrentIconClassName();
+  // Future<void> getCurrentIconClassName() async {
+  //   final icon = await _chameleonIconsPlugin.getCurrentIconClassName();
 
-    setState(() {
-      _currentIcon = icon;
-    });
-  }
+  //   setState(() {
+  //     _currentIcon = icon;
+  //   });
+  // }
 
   Future<void> changeIconToDark() async {
     await _chameleonIconsPlugin.changeIcon("MainActivityDark");
   }
 
-  Future<void> changeIconToOriginal() async {
-    await _chameleonIconsPlugin.changeIcon("MainActivityDefault");
-  }
+  // Future<void> changeIconToOriginal() async {
+  //   await _chameleonIconsPlugin.changeIcon("MainActivityDefault");
+  // }
 
   Future<void> changeIconToGold() async {
     await _chameleonIconsPlugin.changeIcon("MainActivityGold");
@@ -87,17 +87,24 @@ class _MyAppState extends State<MyApp> {
                 },
                 child: Text("Change to Dark Icon"),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  changeIconToOriginal();
-                },
-                child: Text("Change to Original Icon"),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     changeIconToOriginal();
+              //   },
+              //   child: Text("Change to Original Icon"),
+              // ),
               ElevatedButton(
                 onPressed: () {
                   changeIconToGold();
                 },
                 child: Text("Change to Gold Icon"),
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  _chameleonIconsPlugin.resetIcon();
+                },
+                child: Text("Reset Icon"),
               ),
             ],
           ),

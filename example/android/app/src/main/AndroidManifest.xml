@@ -3,6 +3,10 @@
         android:label="chameleon_icons_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Required: Tell the plugin which alias is the default/primary icon -->
+    <meta-data
+        android:name="com.farookjamal.chameleon_icons.DEFAULT_ICON_ALIAS"
+        android:value="MainActivityDefault" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
