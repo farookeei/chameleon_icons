@@ -12,18 +12,44 @@ import XCTest
 // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
 
 class RunnerTests: XCTestCase {
-
-  func testGetPlatformVersion() {
-    let plugin = ChameleonIconsPlugin()
-
-    let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
-
-    let resultExpectation = expectation(description: "result block must be called.")
-    plugin.handle(call) { result in
-      XCTAssertEqual(result as! String, "iOS " + UIDevice.current.systemVersion)
-      resultExpectation.fulfill()
+    
+    func testGetPlatformVersion() {
+        let plugin = ChameleonIconsPlugin()
+        
+        let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
+        
+        let resultExpectation = expectation(description: "result block must be called.")
+        plugin.handle(call) { result in
+            XCTAssertEqual(result as! String, "iOS " + UIDevice.current.systemVersion)
+            resultExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 1)
     }
-    waitForExpectations(timeout: 1)
-  }
+    
+    //TODO
+    func testChangeIcontoDark(){
+        let plugin = ChameleonIconsPlugin()
+        let ChangeIconcall = FlutterMethodCall(methodName: "changeIcon", arguments: "MainActivityDark")
+        let currentIconCall = FlutterMethodCall(methodName: "getCurrentIcon",arguments: nil)
+ 
+        let resultExpectation = expectation(description: "result block must be called.")
+        
+        plugin.handle(ChangeIconcall){
+            result in
+             resultExpectation.fulfill()
+        }
+        waitForExpectations(timeout: 1)
+        
+        plugin.handle(currentIconCall){
+            result in
+            XCTAssertEqual(result as! String, "MainActivityDark")
 
+        }
+        
+        waitForExpectations(timeout: 1)
+
+        
+        
+    }
+    
 }

@@ -27,6 +27,11 @@ class MockChameleonIconsPlatform
     //TODO : implement getCurrentIcon
     throw UnimplementedError();
   }
+
+  @override
+  Future<bool> isAlternateIconsSupported() {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

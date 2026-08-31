@@ -11,10 +11,15 @@ class MethodChannelChameleonIcons extends ChameleonIconsPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>(
-      'getPlatformVersion',
-    );
-    return version;
+    return await methodChannel.invokeMethod<String>('getPlatformVersion');
+  }
+
+  @override
+  Future<bool> isAlternateIconsSupported() async {
+    return await methodChannel.invokeMethod<bool>(
+          "isAlternateIconsSupported",
+        ) ??
+        false;
   }
 
   @override
@@ -25,9 +30,8 @@ class MethodChannelChameleonIcons extends ChameleonIconsPlatform {
   }
 
   @override
-  Future<String?> getCurrentIcon() async {
-    final val = await methodChannel.invokeMethod("getCurrentIcon");
-    return val;
+  Future<String?> getCurrentIcon() {
+    return methodChannel.invokeMethod<String?>("getCurrentIcon");
   }
 
   @override

@@ -27,6 +27,12 @@ abstract class ChameleonIconsPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
+  Future<bool> isAlternateIconsSupported() {
+    throw UnimplementedError(
+      "isAlternateIconsSupported() has not been implemented.",
+    );
+  }
+
   Future<void> changeIcon(String targetIconClassName) {
     throw UnimplementedError('changeIcon() has not been implemented.');
   }

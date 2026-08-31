@@ -5,6 +5,10 @@ class ChameleonIcons {
     return ChameleonIconsPlatform.instance.getPlatformVersion();
   }
 
+  Future<bool> isAlternateIconsSupported() {
+    return ChameleonIconsPlatform.instance.isAlternateIconsSupported();
+  }
+
   Future<void> changeIcon(String targetIconClassName) {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
   }

@@ -18,8 +18,14 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
+        case "isAlternateIconsSupported":
+            result(UIApplication.shared.supportsAlternateIcons)
         case "getCurrentIcon":
             // If alternateIconName is nil, the primary default icon is active!
+            guard _ensureAlternateIconSupported(result: result) else{
+            return
+            }
+            
             let currentIcon =
             UIApplication.shared.alternateIconName
             result(currentIcon)
@@ -27,29 +33,19 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
         case "changeIcon":
             let args = call.arguments as? [String: Any]
             let targetIcon = args?["targetIcon"] as? String
-            guard UIApplication.shared.supportsAlternateIcons else {
-                return result(
-                    FlutterError(
-                        code: "UNSUPPORTED",
-                        message: "Alternate icons not supported",
-                        details: nil
-                    )
-                )
+            
+            
+            guard  _ensureAlternateIconSupported(result: result) else{
+                return
             }
             
             setAlternateIcon(icon: targetIcon,result: result)
             
         case "resetIcon":
             
-            guard  UIApplication.shared.supportsAlternateIcons else {
-                return result(
-                    FlutterError(
-                        code: "UNSUPPORTED",
-                        message: "Alternate icons not supported",
-                        details: nil
-                    )
-                    
-                )
+            
+            guard    _ensureAlternateIconSupported(result: result) else{
+                return
             }
             
             setAlternateIcon(icon: nil,result: result)
@@ -78,4 +74,26 @@ private  func setAlternateIcon(icon: String?,result :@escaping FlutterResult)  {
             result(true)
         }
     }
+}
+
+
+
+
+
+private func _ensureAlternateIconSupported(result:  FlutterResult)->Bool{
+    
+    guard  UIApplication.shared.supportsAlternateIcons else{
+        result(
+            FlutterError(
+                code: "UNSUPPORTED",
+                message: "Alternate icons not supported",
+                details: nil
+            )
+        )
+        
+        return false
+    }
+    
+    return true
+    
 }

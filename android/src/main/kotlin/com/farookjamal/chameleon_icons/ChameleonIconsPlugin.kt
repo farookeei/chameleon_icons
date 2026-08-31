@@ -41,6 +41,7 @@ class ChameleonIconsPlugin :
     ) {
         when (call.method) {
             "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            "isAlternateIconSupported" -> result.success(isAlternateIconsSupported())
             "getCurrentIcon" -> {
                 try {
                     val intent = Intent(Intent.ACTION_MAIN).apply {
@@ -163,6 +164,15 @@ class ChameleonIconsPlugin :
                 )
         } catch (e: PackageManager.NameNotFoundException) {
             throw IllegalStateException("Application meta-data could not be retrieved", e)
+        }
+    }
+
+    private fun isAlternateIconsSupported(): Boolean {
+        try {
+            getDefaultIconAlias()
+            return true;
+        } catch (e: Exception) {
+            return false
         }
     }
 
