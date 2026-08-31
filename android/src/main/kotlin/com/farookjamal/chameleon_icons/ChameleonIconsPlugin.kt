@@ -41,7 +41,7 @@ class ChameleonIconsPlugin :
     ) {
         when (call.method) {
             "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
-            "isAlternateIconSupported" -> result.success(isAlternateIconsSupported())
+            "isAlternateIconsSupported" -> result.success(isAlternateIconsSupported())
             "getCurrentIcon" -> {
                 try {
                     val intent = Intent(Intent.ACTION_MAIN).apply {

@@ -105,6 +105,98 @@ internal class ChameleonIconsPluginTest {
     }
 
     @Test
+    fun onMethodCall_isAlternateIconsSupported_returnsFalse_whenMetadataMissing() {
+        val plugin = ChameleonIconsPlugin()
+        val call = MethodCall("isAlternateIconsSupported", null)
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+
+        plugin.onMethodCall(call, mockResult)
+        Mockito.verify(mockResult).success(false)
+    }
+
+    @Test
+    fun onMethodCall_isAlternateIconsSupported_returnsTrue_whenMetadataPresent() {
+        val plugin = ChameleonIconsPlugin()
+        val mockContext = Mockito.mock(Context::class.java)
+        val mockPackageManager = Mockito.mock(PackageManager::class.java)
+        val mockBinding = Mockito.mock(FlutterPlugin.FlutterPluginBinding::class.java)
+        val mockMessenger = Mockito.mock(BinaryMessenger::class.java)
+        val mockAppInfo = android.content.pm.ApplicationInfo()
+        val mockBundle = Mockito.mock(android.os.Bundle::class.java)
+
+        Mockito.`when`(mockBundle.getString("com.farookjamal.chameleon_icons.DEFAULT_ICON_ALIAS"))
+            .thenReturn("MainActivityDefault")
+        mockAppInfo.metaData = mockBundle
+
+        Mockito.`when`(mockContext.packageName).thenReturn("com.example.app")
+        Mockito.`when`(mockContext.packageManager).thenReturn(mockPackageManager)
+        Mockito.`when`(mockBinding.applicationContext).thenReturn(mockContext)
+        Mockito.`when`(mockBinding.binaryMessenger).thenReturn(mockMessenger)
+        Mockito.`when`(
+            mockPackageManager.getApplicationInfo(
+                Mockito.eq("com.example.app"),
+                Mockito.anyInt()
+            )
+        ).thenReturn(mockAppInfo)
+
+        plugin.onAttachedToEngine(mockBinding)
+
+        val call = MethodCall("isAlternateIconsSupported", null)
+        val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
+
+        plugin.onMethodCall(call, mockResult)
+        Mockito.verify(mockResult).success(true)
+    }
+
+    @Test
+    fun onMethodCall_resetIcon_success_enablesDefaultAlias() {
+        val plugin = ChameleonIconsPlugin()
+        val mockContext = Mockito.mock(Context::class.java)
+        val mockPackageManager = Mockito.mock(PackageManager::class.java)
+        val mockBinding = Mockito.mock(FlutterPlugin.FlutterPluginBinding::class.java)
+        val mockMessenger = Mockito.mock(BinaryMessenger::class.java)
+        val mockAppInfo = android.content.pm.ApplicationInfo()
+        val mockBundle = Mockito.mock(android.os.Bundle::class.java)
+
+        Mockito.`when`(mockBundle.getString("com.farookjamal.chameleon_icons.DEFAULT_ICON_ALIAS"))
+            .thenReturn("MainActivityDefault")
+        mockAppInfo.metaData = mockBundle
+
+        Mockito.`when`(mockContext.packageName).thenReturn("com.example.app")
+        Mockito.`when`(mockContext.packageManager).thenReturn(mockPackageManager)
+        Mockito.`when`(mockBinding.applicationContext).thenReturn(mockContext)
+        Mockito.`when`(mockBinding.binaryMessenger).thenReturn(mockMessenger)
+        Mockito.`when`(
+            mockPackageManager.getApplicationInfo(
+                Mockito.eq("com.example.app"),
+                Mockito.anyInt()
+            )
+        ).thenReturn(mockAppInfo)
+
+        val mockPackageInfo = PackageInfo().apply {
+            activities = arrayOf(
+                ActivityInfo().apply { name = "com.example.app.MainActivity" },
+                ActivityInfo().apply { name = "com.example.app.MainActivityDefault" },
+                ActivityInfo().apply { name = "com.example.app.MainActivityDark" }
+            )
+        }
+        Mockito.`when`(
+            mockPackageManager.getPackageInfo(
+                Mockito.eq("com.example.app"),
+                Mockito.anyInt()
+            )
+        ).thenReturn(mockPackageInfo)
+
+        plugin.onAttachedToEngine(mockBinding)
+
+        val call = MethodCall("resetIcon", null)
+        val mockResult = Mockito.mock(MethodChannel.Result::class.java)
+
+        plugin.onMethodCall(call, mockResult)
+        Mockito.verify(mockResult).success(true)
+    }
+
+    @Test
     fun onMethodCall_unknownMethod_returnsNotImplemented() {
         val plugin = ChameleonIconsPlugin()
         val call = MethodCall("unknownMethod", null)
