@@ -11,7 +11,7 @@ Dynamically changing app icons has traditionally been complex and error-prone:
 * **iOS:** Requires manual configuration of nested `CFBundleAlternateIcons` dictionaries in `Info.plist`, retina `@2x` / `@3x` asset linking, and `UIApplication.setAlternateIconName` handling.
 
 **Chameleon Icons solves both sides:**
-1. **Unified Dart API:** A clean, idiomatic Flutter API (`changeIcon`, `resetIcon`, `getCurrentIconClassName`) that feels natural to Flutter developers.
+1. **Unified Dart API:** A clean, idiomatic Flutter API (`changeIcon`, `resetIcon`, `getCurrentIcon`) that feels natural to Flutter developers.
 2. **Automated CLI Engine:** Define your icons once in `pubspec.yaml`, run `dart run chameleon_icons:generate`, and let the CLI resize all densities and inject all Android XML and iOS Plist configurations automatically.
 
 ---
@@ -96,7 +96,7 @@ await chameleon.changeIcon("MainActivityDark");
 await chameleon.resetIcon();
 
 // 3. Retrieve the currently active icon:
-final currentIcon = await chameleon.getCurrentIconClassName();
+final currentIcon = await chameleon.getCurrentIcon();
 print("Current active icon: $currentIcon");
 ```
 

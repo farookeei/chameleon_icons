@@ -91,9 +91,9 @@ internal class ChameleonIconsPluginTest {
     }
 
     @Test
-    fun onMethodCall_getCurrentIconClassName_returnsError() {
+    fun onMethodCall_getCurrentIcon_returnsError() {
         val plugin = ChameleonIconsPlugin()
-        val call = MethodCall("getCurrentIconClassName", null)
+        val call = MethodCall("getCurrentIcon", null)
         val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
         plugin.onMethodCall(call, mockResult)
 

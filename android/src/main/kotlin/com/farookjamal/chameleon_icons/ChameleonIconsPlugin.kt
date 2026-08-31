@@ -41,29 +41,29 @@ class ChameleonIconsPlugin :
     ) {
         when (call.method) {
             "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
-            //not used currently
-//            "getCurrentIconClassName" -> {
-//                try {
-//                    val intent = Intent(Intent.ACTION_MAIN).apply {
-//                        addCategory(Intent.CATEGORY_LAUNCHER)
-//                        setPackage(packageName)
-//                    }
-//                    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                        context.packageManager.resolveActivity(
-//                            intent,
-//                            PackageManager.ResolveInfoFlags.of(0)
-//                        )
-//                    } else {
-//                        @Suppress("DEPRECATION")
-//                        context.packageManager.resolveActivity(intent, 0)
-//                    }
-//                    val currentActivityClassName = resolveInfo?.activityInfo?.name
-//
-//                    result.success(currentActivityClassName)
-//                } catch (e: Exception) {
-//                    result.error("ERROR", "Failed to get the current icon class name", null)
-//                }
-//            }
+            "getCurrentIcon" -> {
+                try {
+                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_LAUNCHER)
+                        setPackage(packageName)
+                    }
+                    val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        context.packageManager.resolveActivity(
+                            intent,
+                            PackageManager.ResolveInfoFlags.of(0)
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        context.packageManager.resolveActivity(intent, 0)
+                    }
+                    val currentActivityClassName = resolveInfo?.activityInfo?.name
+                    val cleanIconName = currentActivityClassName?.substringAfterLast(".")
+
+                    result.success(cleanIconName)
+                } catch (e: Exception) {
+                    result.error("ERROR", "Failed to get the current icon class name", null)
+                }
+            }
 
             "changeIcon" -> {
                 val targetIcon = call.argument<String>("targetIcon")
@@ -94,8 +94,6 @@ class ChameleonIconsPlugin :
 
 
     }
-
-
 
     /**
      * Enables the target alias and disables all other aliases.

@@ -10,7 +10,7 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
         let instance = ChameleonIconsPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
-
+    
     public func handle(
         _ call: FlutterMethodCall,
         result: @escaping FlutterResult
@@ -18,13 +18,12 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
-            //not used currently
-//        case "getCurrentIconClassName":
-//            // If alternateIconName is nil, the primary default icon is active!
-//            let currentIcon =
-//                UIApplication.shared.alternateIconName
-//            result(currentIcon)
-
+        case "getCurrentIcon":
+            // If alternateIconName is nil, the primary default icon is active!
+            let currentIcon =
+            UIApplication.shared.alternateIconName
+            result(currentIcon)
+            
         case "changeIcon":
             let args = call.arguments as? [String: Any]
             let targetIcon = args?["targetIcon"] as? String
@@ -37,30 +36,29 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
                     )
                 )
             }
-             
+            
             setAlternateIcon(icon: targetIcon,result: result)
-
+            
         case "resetIcon":
-            let args = call.arguments as? [String: Any]
-
-            guard UIApplication.shared.supportsAlternateIcons else {
+            
+            guard  UIApplication.shared.supportsAlternateIcons else {
                 return result(
                     FlutterError(
                         code: "UNSUPPORTED",
                         message: "Alternate icons not supported",
                         details: nil
                     )
-
+                    
                 )
             }
-
+            
             setAlternateIcon(icon: nil,result: result)
-
+            
         default:
             result(FlutterMethodNotImplemented)
         }
-
-       
+        
+        
     }
 }
 

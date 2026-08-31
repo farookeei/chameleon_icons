@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    // getCurrentIconClassName();
+    getCurrentIcon();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -51,13 +51,13 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  // Future<void> getCurrentIconClassName() async {
-  //   final icon = await _chameleonIconsPlugin.getCurrentIconClassName();
+  Future<void> getCurrentIcon() async {
+    final icon = await _chameleonIconsPlugin.getCurrentIcon();
 
-  //   setState(() {
-  //     _currentIcon = icon;
-  //   });
-  // }
+    setState(() {
+      _currentIcon = icon;
+    });
+  }
 
   Future<void> changeIconToDark() async {
     await _chameleonIconsPlugin.changeIcon("MainActivityDark");

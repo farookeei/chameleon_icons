@@ -9,9 +9,9 @@ class ChameleonIcons {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
   }
 
-  // Future<String?> getCurrentIconClassName() {
-  //   return ChameleonIconsPlatform.instance.getCurrentIconClassName();
-  // }
+  Future<String?> getCurrentIcon() {
+    return ChameleonIconsPlatform.instance.getCurrentIcon();
+  }
 
   Future<void> resetIcon() {
     return ChameleonIconsPlatform.instance.resetIcon();

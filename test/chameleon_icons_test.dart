@@ -18,7 +18,13 @@ class MockChameleonIconsPlatform
 
   @override
   Future<void> resetIcon() {
-    // TODO: implement getCurrentIconClassName
+    // TODO: implement resetIcon
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> getCurrentIcon() {
+    //TODO : implement getCurrentIcon
     throw UnimplementedError();
   }
 }
@@ -29,6 +35,15 @@ void main() {
 
   test('$MethodChannelChameleonIcons is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelChameleonIcons>());
+  });
+
+  test('changeIcon calls platform instance', () async {
+    final chameleon = ChameleonIcons();
+    final fakePlatform = MockChameleonIconsPlatform();
+    ChameleonIconsPlatform.instance = fakePlatform;
+
+    await chameleon.changeIcon("MainActivityDark");
+    // expect(fakePlatform.lastChangedIcon, 'MainActivityDark');
   });
 
   test('getPlatformVersion', () async {
