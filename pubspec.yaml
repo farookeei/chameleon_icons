@@ -1,7 +1,9 @@
 name: chameleon_icons
-description: "A new Flutter plugin project."
+description: A Flutter plugin to dynamically change and reset app launcher icons at runtime on Android and iOS.
 version: 0.0.1
-homepage:
+repository: https://github.com/farookeei/chameleon_icons
+issue_tracker: https://github.com/farookeei/chameleon_icons/issues
+homepage: https://github.com/farookeei/chameleon_icons
 
 environment:
   sdk: ^3.13.0
