@@ -27,9 +27,9 @@ void main() {
 
     await plugin.changeIcon("MainActivityDark");
 
-    final String? currentIcon = await plugin.getCurrentIcon();
+    final String currentIcon = await plugin.getCurrentIcon();
 
-    expect(currentIcon?.endsWith("MainActivityDark"), true);
+    expect(currentIcon.endsWith("MainActivityDark"), true);
   });
 
   testWidgets('icon change from default to gold', (WidgetTester tester) async {
@@ -37,8 +37,8 @@ void main() {
 
     await plugin.changeIcon("MainActivityGold");
 
-    final String? currentIcon = await plugin.getCurrentIcon();
+    final String currentIcon = await plugin.getCurrentIcon();
 
-    expect(currentIcon?.endsWith("MainActivityGold"), true);
+    expect(currentIcon.endsWith("MainActivityGold"), true);
   });
 }
