@@ -1,24 +1,20 @@
-name: Publish to Pub.dev
+# Workflow to automate publishing chameleon_icons to pub.dev
+name: Publish to pub.dev
 
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
-  workflow_dispatch:
+      - 'v*' # Trigger on any tag starting with v (e.g., v0.1.0)
 
 jobs:
-  publish:
-    name: Publish package
-    permissions:
-      id-token: write # Required for pub.dev OIDC authentication
-
+  # PHASE 1: Quality Checks (Analyze & Test)
+  checks:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
@@ -27,14 +23,31 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
+      - name: Check Formatting (10 pub.dev points)
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze package
+      - name: Analyze code
         run: flutter analyze
 
-      - name: Run unit tests
+      - name: Run tests
         run: flutter test
 
-      - name: Publish to pub.dev
-        run: dart pub publish --force
+      - name: Verify Version & Changelog
+        run: |
+          PUBSPEC_VERSION=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          if [ "$PUBSPEC_VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: version mismatch ($PUBSPEC_VERSION vs tag $TAG_VERSION)"
+            exit 1
+          fi
+          if ! grep -q "## $PUBSPEC_VERSION" CHANGELOG.md; then
+            echo "Error: CHANGELOG.md missing entries for $PUBSPEC_VERSION"
+            exit 1
+          fi
+
+  # PHASE 2: Official Publishing via Google/Dart OIDC
+  publish:
+    needs: checks # Only run if Phase 1 passes!
+    permissions:
+      id-token: write # Required for OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
