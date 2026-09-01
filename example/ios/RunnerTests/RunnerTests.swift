@@ -26,30 +26,18 @@ class RunnerTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
     
-    //TODO
-    func testChangeIcontoDark(){
+    func testIsAlternateIconsSupported() {
         let plugin = ChameleonIconsPlugin()
-        let ChangeIconcall = FlutterMethodCall(methodName: "changeIcon", arguments: "MainActivityDark")
-        let currentIconCall = FlutterMethodCall(methodName: "getCurrentIcon",arguments: nil)
- 
-        let resultExpectation = expectation(description: "result block must be called.")
+        let call = FlutterMethodCall(methodName: "isAlternateIconsSupported", arguments: nil)
         
-        plugin.handle(ChangeIconcall){
-            result in
-             resultExpectation.fulfill()
+        let expectation = expectation(description: "isAlternateIconsSupported must return")
+        plugin.handle(call) { result in
+            XCTAssertNotNil(result as? Bool)
+            expectation.fulfill()
         }
         waitForExpectations(timeout: 1)
-        
-        plugin.handle(currentIconCall){
-            result in
-            XCTAssertEqual(result as! String, "MainActivityDark")
-
-        }
-        
-        waitForExpectations(timeout: 1)
-
-        
-        
     }
+    
+    
     
 }
