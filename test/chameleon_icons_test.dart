@@ -27,7 +27,7 @@ class MockChameleonIconsPlatform
   }
 
   @override
-  Future<String?> getCurrentIcon() => Future.value('MainActivityDark');
+  Future<String> getCurrentIcon() => Future.value('MainActivityDark');
 }
 
 void main() {

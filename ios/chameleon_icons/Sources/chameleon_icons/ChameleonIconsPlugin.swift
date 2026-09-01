@@ -23,31 +23,26 @@ public class ChameleonIconsPlugin: NSObject, FlutterPlugin {
         case "getCurrentIcon":
             // If alternateIconName is nil, the primary default icon is active!
             guard _ensureAlternateIconSupported(result: result) else{
-            return
+                return
             }
             
             let currentIcon =
-            UIApplication.shared.alternateIconName
+            UIApplication.shared.alternateIconName ?? getDefaultIcon()
             result(currentIcon)
             
         case "changeIcon":
             let args = call.arguments as? [String: Any]
             let targetIcon = args?["targetIcon"] as? String
             
-            
             guard  _ensureAlternateIconSupported(result: result) else{
                 return
             }
-            
             setAlternateIcon(icon: targetIcon,result: result)
             
         case "resetIcon":
-            
-            
-            guard    _ensureAlternateIconSupported(result: result) else{
+            guard _ensureAlternateIconSupported(result: result) else{
                 return
             }
-            
             setAlternateIcon(icon: nil,result: result)
             
         default:
@@ -97,3 +92,25 @@ private func _ensureAlternateIconSupported(result:  FlutterResult)->Bool{
     return true
     
 }
+
+
+private func getDefaultIcon()->String{
+    guard let  iconsDict =  Bundle.main.object(forInfoDictionaryKey: "CFBundleIcons") as? [String: Any],
+          let primaryIconDict =   iconsDict["CFBundlePrimaryIcon"] as? [String: Any],
+          let iconFiles = primaryIconDict["CFBundleIconFiles"] as? [String],
+          let icon = iconFiles.first,
+          !icon.isEmpty  else{
+        return "AppIcon"
+    }
+
+    // Dynamically strips any trailing dimension like "60x60", "76x76", "1024x1024"
+    // "ApplicationIcon60x60" -> "ApplicationIcon"
+    // "AppIcon60x60"         -> "AppIcon"
+    // "CustomIcon"           -> "CustomIcon"
+    let cleanIconName = icon.replacingOccurrences(of: "\\d+x\\d+.*", with: "", options: .regularExpression)
+    
+    return icon
+    
+}
+
+

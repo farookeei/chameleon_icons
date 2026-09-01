@@ -61,6 +61,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> changeIconToDark() async {
     await _chameleonIconsPlugin.changeIcon("MainActivityDark");
+    getCurrentIcon();
   }
 
   // Future<void> changeIconToOriginal() async {
@@ -69,6 +70,12 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> changeIconToGold() async {
     await _chameleonIconsPlugin.changeIcon("MainActivityGold");
+    getCurrentIcon();
+  }
+
+  Future<void> resetIcon() async {
+    await _chameleonIconsPlugin.resetIcon();
+    getCurrentIcon();
   }
 
   @override
@@ -102,7 +109,7 @@ class _MyAppState extends State<MyApp> {
 
               ElevatedButton(
                 onPressed: () {
-                  _chameleonIconsPlugin.resetIcon();
+                  resetIcon();
                 },
                 child: Text("Reset Icon"),
               ),

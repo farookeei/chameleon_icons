@@ -30,8 +30,8 @@ class MethodChannelChameleonIcons extends ChameleonIconsPlatform {
   }
 
   @override
-  Future<String?> getCurrentIcon() {
-    return methodChannel.invokeMethod<String?>("getCurrentIcon");
+  Future<String> getCurrentIcon() async {
+    return await methodChannel.invokeMethod<String>("getCurrentIcon") ?? "";
   }
 
   @override

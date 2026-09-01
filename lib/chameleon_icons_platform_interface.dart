@@ -41,7 +41,7 @@ abstract class ChameleonIconsPlatform extends PlatformInterface {
     throw UnimplementedError('resetIcon() has not been implemented.');
   }
 
-  Future<String?> getCurrentIcon() {
+  Future<String> getCurrentIcon() {
     throw UnimplementedError('getCurrentIcon() has not been implemented.');
   }
 }

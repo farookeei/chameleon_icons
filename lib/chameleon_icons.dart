@@ -13,7 +13,7 @@ class ChameleonIcons {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
   }
 
-  Future<String?> getCurrentIcon() {
+  Future<String> getCurrentIcon() {
     return ChameleonIconsPlatform.instance.getCurrentIcon();
   }
 
