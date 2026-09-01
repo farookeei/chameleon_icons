@@ -109,7 +109,7 @@ private func getDefaultIcon()->String{
     // "CustomIcon"           -> "CustomIcon"
     let cleanIconName = icon.replacingOccurrences(of: "\\d+x\\d+.*", with: "", options: .regularExpression)
     
-    return icon
+    return cleanIconName.isEmpty ? icon :cleanIconName
     
 }
 
