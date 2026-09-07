@@ -1,4 +1,4 @@
-import 'chameleon_icons_platform_interface.dart';
+import 'src/platform/chameleon_icons_platform_interface.dart';
 
 /// The main entry point for the Chameleon Icons plugin.
 ///
