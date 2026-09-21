@@ -32,14 +32,14 @@ chameleon_icons:
       expect(darkIcon.imagePath, 'assets/icons/dark.png');
       expect(darkIcon.isDefault, false);
       expect(darkIcon.androidDrawableName, 'ic_launcher_dark');
-      expect(darkIcon.iosAssetName, 'dark_icon');
+      expect(darkIcon.iosAssetName, 'AppIcon-dark');
 
       final goldIcon = config.alternateIcons[1];
       expect(goldIcon.key, 'gold');
       expect(goldIcon.name, 'MainActivityGold');
       expect(goldIcon.imagePath, 'assets/icons/gold.png');
       expect(goldIcon.androidDrawableName, 'ic_launcher_gold');
-      expect(goldIcon.iosAssetName, 'gold_icon');
+      expect(goldIcon.iosAssetName, 'AppIcon-gold');
 
       expect(config.allIcons.length, 3);
     });
@@ -60,7 +60,7 @@ chameleon_icons:
       expect(config.defaultIcon.name, 'CustomDefault');
       expect(config.alternateIcons[0].name, 'CustomMidnight');
       expect(config.alternateIcons[0].androidDrawableName, 'ic_launcher_midnight');
-      expect(config.alternateIcons[0].iosAssetName, 'midnight_icon');
+      expect(config.alternateIcons[0].iosAssetName, 'AppIcon-midnight');
     });
 
     test('throws ChameleonConfigException when chameleon_icons block is missing', () {

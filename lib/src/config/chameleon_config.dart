@@ -35,9 +35,9 @@ class IconConfig {
   String get androidDrawableName =>
       isDefault ? 'ic_launcher' : 'ic_launcher_${key.toLowerCase()}';
 
-  /// The base filename used in iOS bundle resources (e.g. 'AppIcon' or 'dark_icon').
+  /// The base filename used in iOS bundle resources (e.g. 'AppIcon' or 'AppIcon-dark').
   String get iosAssetName =>
-      isDefault ? 'AppIcon' : '${key.toLowerCase()}_icon';
+      isDefault ? 'AppIcon' : 'AppIcon-${key.toLowerCase()}';
 
   @override
   bool operator ==(Object other) =>
