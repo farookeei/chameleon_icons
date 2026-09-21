@@ -9,6 +9,7 @@
 library;
 
 import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:chameleon_icons/src/config/chameleon_config.dart';
 import 'package:chameleon_icons/src/processor/image_processor.dart';
@@ -47,22 +48,23 @@ void main(List<String> arguments) {
     }
 
     // Determine project root directory from pubspec location
-    final projectRoot = pubspecFile.parent.path.isEmpty ? '.' : pubspecFile.parent.path;
+    final projectRoot = pubspecFile.parent.path.isEmpty
+        ? '.'
+        : pubspecFile.parent.path;
 
     print(' Reading configuration from $pubspecPath...');
     final config = ChameleonConfig.loadFromPubspec(pubspecPath);
 
     print('Found ${config.allIcons.length} icon definitions:');
-    print('  - Default: ${config.defaultIcon.key} (${config.defaultIcon.imagePath})');
+    print(
+      '  - Default: ${config.defaultIcon.key} (${config.defaultIcon.imagePath})',
+    );
     for (final alt in config.alternateIcons) {
       print('  - Alternate: ${alt.key} (${alt.imagePath}) -> ${alt.name}');
     }
     print('');
 
-    final processor = ImageProcessor(
-      config: config,
-      projectRoot: projectRoot,
-    );
+    final processor = ImageProcessor(config: config, projectRoot: projectRoot);
 
     processor.process();
   } on FormatException catch (e) {

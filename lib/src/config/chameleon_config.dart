@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:yaml/yaml.dart';
 
 /// Exception thrown when the `chameleon_icons` configuration in pubspec.yaml is invalid.
@@ -75,7 +76,9 @@ class ChameleonConfig {
   List<IconConfig> get allIcons => [defaultIcon, ...alternateIcons];
 
   /// Loads and parses the configuration directly from a `pubspec.yaml` file.
-  factory ChameleonConfig.loadFromPubspec([String pubspecPath = 'pubspec.yaml']) {
+  factory ChameleonConfig.loadFromPubspec([
+    String pubspecPath = 'pubspec.yaml',
+  ]) {
     final file = File(pubspecPath);
     if (!file.existsSync()) {
       throw ChameleonConfigException(
@@ -92,7 +95,9 @@ class ChameleonConfig {
     final dynamic yaml = loadYaml(yamlContent);
 
     if (yaml == null || yaml is! YamlMap) {
-      throw const ChameleonConfigException('Invalid or empty pubspec.yaml file.');
+      throw const ChameleonConfigException(
+        'Invalid or empty pubspec.yaml file.',
+      );
     }
 
     final dynamic chameleonSection = yaml['chameleon_icons'];
@@ -156,8 +161,8 @@ class ChameleonConfig {
         }
 
         // Auto-generate PascalCase name if not provided (e.g. 'dark' -> 'MainActivityDark')
-        final String name = value['name']?.toString() ??
-            'MainActivity${_capitalize(key)}';
+        final String name =
+            value['name']?.toString() ?? 'MainActivity${_capitalize(key)}';
 
         alternateIcons.add(
           IconConfig(

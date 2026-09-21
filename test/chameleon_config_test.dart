@@ -59,23 +59,29 @@ chameleon_icons:
       final config = ChameleonConfig.fromYaml(yaml);
       expect(config.defaultIcon.name, 'CustomDefault');
       expect(config.alternateIcons[0].name, 'CustomMidnight');
-      expect(config.alternateIcons[0].androidDrawableName, 'ic_launcher_midnight');
+      expect(
+        config.alternateIcons[0].androidDrawableName,
+        'ic_launcher_midnight',
+      );
       expect(config.alternateIcons[0].iosAssetName, 'midnight_icon');
     });
 
-    test('throws ChameleonConfigException when chameleon_icons block is missing', () {
-      const yaml = '''
+    test(
+      'throws ChameleonConfigException when chameleon_icons block is missing',
+      () {
+        const yaml = '''
 name: my_app
 dependencies:
   flutter:
     sdk: flutter
 ''';
 
-      expect(
-        () => ChameleonConfig.fromYaml(yaml),
-        throwsA(isA<ChameleonConfigException>()),
-      );
-    });
+        expect(
+          () => ChameleonConfig.fromYaml(yaml),
+          throwsA(isA<ChameleonConfigException>()),
+        );
+      },
+    );
 
     test('throws ChameleonConfigException when default_icon is missing', () {
       const yaml = '''

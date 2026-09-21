@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:image/image.dart' as img;
+
 import '../config/chameleon_config.dart';
 import '../models/icon_density.dart';
 
@@ -20,10 +22,7 @@ class ImageProcessor {
   final ChameleonConfig config;
   final String projectRoot;
 
-  ImageProcessor({
-    required this.config,
-    this.projectRoot = '.',
-  });
+  ImageProcessor({required this.config, this.projectRoot = '.'});
 
   /// Processes all configured icons (default and alternates) for Android and iOS.
   void process() {
@@ -71,7 +70,9 @@ class ImageProcessor {
       );
     }
 
-    print('Processing icon "${icon.key}" from ${icon.imagePath} (${image.width}x${image.height}px)');
+    print(
+      'Processing icon "${icon.key}" from ${icon.imagePath} (${image.width}x${image.height}px)',
+    );
 
     if (hasAndroid) {
       _generateAndroidIcons(image, icon);
@@ -98,10 +99,14 @@ class ImageProcessor {
         targetDir.createSync(recursive: true);
       }
 
-      final targetFile = File('${targetDir.path}/${icon.androidDrawableName}.png');
+      final targetFile = File(
+        '${targetDir.path}/${icon.androidDrawableName}.png',
+      );
       targetFile.writeAsBytesSync(img.encodePng(resized));
 
-      print('  ✓ [Android] Generated: ${density.folderName}/${icon.androidDrawableName}.png (${density.size}x${density.size})');
+      print(
+        '  ✓ [Android] Generated: ${density.folderName}/${icon.androidDrawableName}.png (${density.size}x${density.size})',
+      );
     }
   }
 
@@ -144,19 +149,18 @@ class ImageProcessor {
           'idiom': 'universal',
           'platform': 'ios',
           'size': '1024x1024',
-        }
+        },
       ],
-      'info': {
-        'author': 'xcode',
-        'version': 1,
-      }
+      'info': {'author': 'xcode', 'version': 1},
     };
 
     contentsFile.writeAsStringSync(
       const JsonEncoder.withIndent('  ').convert(contentsJson),
     );
 
-    print('  ✓ [iOS Default] Generated: AppIcon.appiconset/$iconFileName (1024x1024)');
+    print(
+      '  ✓ [iOS Default] Generated: AppIcon.appiconset/$iconFileName (1024x1024)',
+    );
   }
 
   /// Generates universal loose PNGs directly in ios/Runner/ for alternate icons
@@ -175,7 +179,9 @@ class ImageProcessor {
       final targetFile = File('${runnerDir.path}/$fileName');
       targetFile.writeAsBytesSync(img.encodePng(resized));
 
-      print('  ✓ [iOS Alternate] Generated: Runner/$fileName (${res.size}x${res.size})');
+      print(
+        '  ✓ [iOS Alternate] Generated: Runner/$fileName (${res.size}x${res.size})',
+      );
     }
   }
 }

@@ -9,10 +9,7 @@ class AndroidIconDensity {
   /// The icon width and height in pixels.
   final int size;
 
-  const AndroidIconDensity({
-    required this.folderName,
-    required this.size,
-  });
+  const AndroidIconDensity({required this.folderName, required this.size});
 
   /// Standard Android launcher icon density specifications.
   static const List<AndroidIconDensity> standardDensities = [
@@ -32,10 +29,7 @@ class IosIconResolution {
   /// The icon width and height in pixels.
   final int size;
 
-  const IosIconResolution({
-    required this.suffix,
-    required this.size,
-  });
+  const IosIconResolution({required this.suffix, required this.size});
 
   /// Standard iOS loose alternate icon resolutions.
   static const List<IosIconResolution> standardResolutions = [
