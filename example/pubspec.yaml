@@ -30,12 +30,12 @@ dev_dependencies:
 
 chameleon_icons:
   default_icon:   
-    image_path: "assets/icons/chameleon.png"
+    image_path: "assets/icons/default.png"
   alternate_icons:
     dark:
-      image_path: "assets/icons/dark_icon.png"
+      image_path: "assets/icons/dark.png"
     gold:
-      image_path: "assets/icons/gold_icon.png"
+      image_path: "assets/icons/gold.png"
   
  
 flutter:

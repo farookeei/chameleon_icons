@@ -47,7 +47,7 @@ class ChameleonIcons {
   ///   other launcher aliases.
   /// - On iOS: Calls `UIApplication.shared.setAlternateIconName([targetIconClassName])`.
   ///
-  /// Throws a [PlatformException] if the operation fails or is unsupported.
+  /// Throws a `PlatformException` if the operation fails or is unsupported.
   Future<void> changeIcon(String targetIconClassName) {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
   }
@@ -69,7 +69,7 @@ class ChameleonIcons {
   /// - On Android: Re-enables the default `<activity-alias>` and disables alternates.
   /// - On iOS: Calls `UIApplication.shared.setAlternateIconName(nil)` to restore `CFBundlePrimaryIcon`.
   ///
-  /// Throws a [PlatformException] if the operation fails or is unsupported.
+  /// Throws a `PlatformException` if the operation fails or is unsupported.
   Future<void> resetIcon() {
     return ChameleonIconsPlatform.instance.resetIcon();
   }
