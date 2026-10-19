@@ -17,14 +17,14 @@ Dynamically changing app icons has traditionally been complex and error-prone:
 
 **Chameleon Icons solves both sides:**
 1. **Unified Dart API:** A clean, idiomatic Flutter API (`changeIcon`, `resetIcon`, `getCurrentIcon`, `isAlternateIconsSupported`) that feels natural to Flutter developers.
-2. **Automated CLI Engine (Coming in v0.1.0):** Define icons once in `pubspec.yaml`, run `dart run chameleon_icons:generate`, and let the CLI resize all densities and inject all Android XML and iOS Plist configurations automatically.
+2. **Automated CLI Engine:** Define icons once in `pubspec.yaml`, run `dart run chameleon_icons:generate`, and let the CLI resize all densities and inject all Android XML and iOS Plist configurations automatically.
 
 ---
 
 ## Platform Support
 
 | Platform | Supported | Switching Engine |
-| :--- | :---: | :--- |
+| :--- | :--- | :--- |
 | **Android** | **Yes** (API 24+) | `PackageManager.setComponentEnabledSetting` via `<activity-alias>` |
 | **iOS** | **Yes** (iOS 15.0+) | `UIApplication.shared.setAlternateIconName(_:)` via `CFBundleAlternateIcons` |
 
@@ -36,7 +36,7 @@ Add `chameleon_icons` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  chameleon_icons: ^0.0.1
+  chameleon_icons: ^0.1.0
 ```
 
 Then run:
@@ -46,13 +46,52 @@ flutter pub get
 
 ---
 
-## Platform Setup (v0.0.1 Manual Setup)
+## Quick Start (Automated with CLI)
 
-> **Note:** In version **0.1.0**, this setup will be 100% automated using `dart run chameleon_icons:generate`. For version `0.0.1`, follow the manual setup below.
+### 1. Configure icons in `pubspec.yaml`
+
+Add the `chameleon_icons` section to your `pubspec.yaml`:
+
+```yaml
+chameleon_icons:
+  default_icon:
+    name: "MainActivityDefault" # Android alias name (optional, defaults to MainActivityDefault)
+    image_path: "assets/icons/default.png"
+  alternate_icons:
+    - name: "MainActivityDark"
+      image_path: "assets/icons/dark.png"
+    - name: "MainActivityGold"
+      image_path: "assets/icons/gold.png"
+```
+
+### 2. Run the Generator
+
+Run the generator from your project root:
+
+```bash
+dart run chameleon_icons:generate
+```
+
+You can also specify a custom config file path:
+```bash
+dart run chameleon_icons:generate --path path/to/pubspec.yaml
+```
+
+**What the CLI does automatically:**
+- **Android:**
+  - Decodes and resizes your source images into all standard densities: `mipmap-mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, and `xxxhdpi`.
+  - Removes the direct launcher intent filter from `.MainActivity` in `AndroidManifest.xml`.
+  - Injects default icon metadata and `<activity-alias>` tags wrapped in idempotent anchor comments.
+- **iOS:**
+  - Generates full retina loose assets for Runner (`@2x`, `@3x`, `~ipad@2x`, `~ipad-pro@2x`) and the primary 1024×1024 AppIcon.
+  - Injects `CFBundleIcons` and `CFBundleIcons~ipad` into `ios/Runner/Info.plist` safely and idempotently.
 
 ---
 
-### 1. Android Configuration
+<details>
+<summary><b>Manual Native Setup (Optional)</b></summary>
+
+If you prefer to configure your native files manually instead of using the CLI generator:
 
 Open `android/app/src/main/AndroidManifest.xml` and make the following adjustments:
 
@@ -196,6 +235,8 @@ Open `ios/Runner/Info.plist` and add the `CFBundleIcons` dictionary under the ro
 </dict>
 ```
 
+</details>
+
 ---
 
 ## Dart API Usage
@@ -238,8 +279,8 @@ if (isSupported) {
 ## Roadmap
 
 * **Phase 1 (v0.0.1):** Core native runtime engine for Android & iOS with decoupled `changeIcon()` and `resetIcon()`. (Completed)
-* **Phase 2 (v0.1.0):** Automated CLI image generation (`dart run chameleon_icons:generate`) for automatic multi-density asset resizing.
-* **Phase 3 (v0.1.0):** Automated injection into `AndroidManifest.xml` and `Info.plist`.
+* **Phase 2 (v0.1.0):** Automated CLI image generation (`dart run chameleon_icons:generate`) for automatic multi-density asset resizing. (Completed)
+* **Phase 3 (v0.1.0):** Automated injection into `AndroidManifest.xml` and `Info.plist`. (Completed)
 * **Phase 4 (v0.2.0):** Ready-to-use customizable UI components (Telegram-style `ChameleonIconGrid`).
 
 ---

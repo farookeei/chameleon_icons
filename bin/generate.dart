@@ -12,6 +12,8 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:chameleon_icons/src/config/chameleon_config.dart';
+import 'package:chameleon_icons/src/injector/android_manifest_injector.dart';
+import 'package:chameleon_icons/src/injector/ios_plist_injector.dart';
 import 'package:chameleon_icons/src/processor/image_processor.dart';
 
 void main(List<String> arguments) {
@@ -52,7 +54,7 @@ void main(List<String> arguments) {
         ? '.'
         : pubspecFile.parent.path;
 
-    print(' Reading configuration from $pubspecPath...');
+    print('Reading configuration from $pubspecPath...');
     final config = ChameleonConfig.loadFromPubspec(pubspecPath);
 
     print('Found ${config.allIcons.length} icon definitions:');
@@ -64,9 +66,35 @@ void main(List<String> arguments) {
     }
     print('');
 
+    // 1. Process and generate image densities for Android and iOS
     final processor = ImageProcessor(config: config, projectRoot: projectRoot);
-
     processor.process();
+
+    // 2. Inject AndroidManifest.xml configuration (if Android exists)
+    final androidManifestFile = File(
+      '$projectRoot/android/app/src/main/AndroidManifest.xml',
+    );
+    if (androidManifestFile.existsSync()) {
+      final androidInjector = AndroidManifestInjector(
+        config: config,
+        projectRoot: projectRoot,
+      );
+      androidInjector.inject();
+    }
+
+    // 3. Inject Info.plist configuration (if iOS exists)
+    final iosPlistFile = File('$projectRoot/ios/Runner/Info.plist');
+    if (iosPlistFile.existsSync()) {
+      final iosInjector = IosPlistInjector(
+        config: config,
+        projectRoot: projectRoot,
+      );
+      iosInjector.inject();
+    }
+
+    print(
+      '\n [chameleon_icons] Full setup complete! All images generated and native configs injected.',
+    );
   } on FormatException catch (e) {
     stderr.writeln('❌ Invalid CLI argument: ${e.message}');
     stderr.writeln(parser.usage);
@@ -76,6 +104,9 @@ void main(List<String> arguments) {
     exit(1);
   } on ChameleonImageException catch (e) {
     stderr.writeln('❌ Image Processing Error: ${e.message}');
+    exit(1);
+  } on ChameleonInjectionException catch (e) {
+    stderr.writeln('❌ Native Injection Error: ${e.message}');
     exit(1);
   } catch (e, st) {
     stderr.writeln('❌ Unexpected error: $e');
