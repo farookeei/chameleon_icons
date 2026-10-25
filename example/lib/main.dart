@@ -44,55 +44,27 @@ class IconPickerScreen extends StatefulWidget {
 
 class _IconPickerScreenState extends State<IconPickerScreen> {
   String _platformVersion = 'Loading...';
-  String _currentIcon = '';
-  bool _isLoading = false;
   final _chameleonIcons = ChameleonIcons();
-
   final List<ChameleonIconDefinition> _icons = ChameleonGeneratedIcons.all;
 
   @override
   void initState() {
     super.initState();
-    _loadInitialState();
+    _initChameleon();
   }
 
-  Future<void> _loadInitialState() async {
-    String platformVersion;
-    try {
-      platformVersion = await _chameleonIcons.getPlatformVersion() ?? 'Unknown';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version';
-    }
-
-    final activeIcon = await _chameleonIcons.getCurrentIcon();
-
+  Future<void> _initChameleon() async {
+    final version = await _chameleonIcons.getPlatformVersion() ?? 'Unknown';
+    await _chameleonIcons.initialize(_icons);
     if (!mounted) return;
-    setState(() {
-      _platformVersion = platformVersion;
-      _currentIcon = activeIcon;
-    });
-  }
-
-  bool _isIconSelected(ChameleonIconDefinition icon) {
-    return icon.matches(_currentIcon);
+    setState(() => _platformVersion = version);
   }
 
   Future<void> _selectIcon(ChameleonIconDefinition icon) async {
-    if (icon.matches(_currentIcon) || _isLoading) return;
-
-    setState(() => _isLoading = true);
-
     try {
       await _chameleonIcons.setIcon(icon);
 
-      final updatedIcon = await _chameleonIcons.getCurrentIcon();
-
       if (!mounted) return;
-      setState(() {
-        _currentIcon = updatedIcon;
-        _isLoading = false;
-      });
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('App icon changed to "${icon.label}"'),
@@ -102,7 +74,6 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
       );
     } on PlatformException catch (e) {
       if (!mounted) return;
-      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to change icon: ${e.message}'),
@@ -126,223 +97,229 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            // Platform & Current Status Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    color: theme.colorScheme.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _platformVersion,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Active: ${_icons.firstWhere((i) => i.matches(_currentIcon), orElse: () => ChameleonGeneratedIcons.defaultIcon).label}',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+        child: ValueListenableBuilder<ChameleonIconDefinition?>(
+          valueListenable: _chameleonIcons.activeIconNotifier,
+          builder: (context, activeIcon, _) {
+            final activeLabel = activeIcon?.label ?? 'Loading...';
+
+            return ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              children: [
+                // Platform & Current Status Header
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
                     ),
-                  ),
-                  if (_isLoading)
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            Text(
-              'CHOOSE AN ICON',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Telegram-style Horizontal Row Container
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _icons.map((iconOption) {
-                  final isSelected = _isIconSelected(iconOption);
-
-                  return InkWell(
                     borderRadius: BorderRadius.circular(16),
-                    onTap: () => _selectIcon(iconOption),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 24,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Squircle App Icon Preview with Stacked Checkmark Badge
-                          Stack(
-                            clipBehavior: Clip.none,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _platformVersion,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Active: $activeLabel',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                Text(
+                  'CHOOSE AN ICON',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Telegram-style Horizontal Row Container
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20,
+                    horizontal: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _icons.map((iconOption) {
+                      final isSelected = activeIcon == iconOption;
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => _selectIcon(iconOption),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Squircle App Icon Preview with Stacked Checkmark Badge
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? theme.colorScheme.primary
+                                            : Colors.transparent,
+                                        width: isSelected ? 3 : 0,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? theme.colorScheme.primary
+                                                    .withValues(alpha: 0.25)
+                                              : Colors.black.withValues(
+                                                  alpha: 0.12,
+                                                ),
+                                          blurRadius: isSelected ? 10 : 6,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Image.asset(
+                                        iconOption.assetPath,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, _, _) => Container(
+                                          color: theme
+                                              .colorScheme
+                                              .surfaceContainer,
+                                          child: const Icon(
+                                            Icons.broken_image_rounded,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // Telegram Checkmark Badge
+                                  if (isSelected)
+                                    Positioned(
+                                      right: -4,
+                                      bottom: -4,
+                                      child: Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: theme.colorScheme.surface,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Icon Label
+                              Text(
+                                iconOption.label,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+
+                              // Telegram-style Radio Indicator
                               AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                width: 72,
-                                height: 72,
+                                duration: const Duration(milliseconds: 200),
+                                width: 18,
+                                height: 18,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(18),
+                                  shape: BoxShape.circle,
+                                  color: isSelected
+                                      ? theme.colorScheme.primary
+                                      : Colors.transparent,
                                   border: Border.all(
                                     color: isSelected
                                         ? theme.colorScheme.primary
-                                        : Colors.transparent,
-                                    width: isSelected ? 3 : 0,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: isSelected
-                                          ? theme.colorScheme.primary
-                                                .withValues(alpha: 0.25)
-                                          : Colors.black.withValues(
-                                              alpha: 0.12,
-                                            ),
-                                      blurRadius: isSelected ? 10 : 6,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Image.asset(
-                                    iconOption.assetPath,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
-                                      color: theme.colorScheme.surfaceContainer,
-                                      child: const Icon(
-                                        Icons.broken_image_rounded,
-                                      ),
-                                    ),
+                                        : theme.colorScheme.outlineVariant,
+                                    width: 2,
                                   ),
                                 ),
+                                child: isSelected
+                                    ? const Center(
+                                        child: Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                      )
+                                    : null,
                               ),
-
-                              // Telegram Checkmark Badge
-                              if (isSelected)
-                                Positioned(
-                                  right: -4,
-                                  bottom: -4,
-                                  child: Container(
-                                    width: 22,
-                                    height: 22,
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: theme.colorScheme.surface,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 14,
-                                    ),
-                                  ),
-                                ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-
-                          // Icon Label
-                          Text(
-                            iconOption.label,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? theme.colorScheme.primary
-                                  : theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-
-                          // Telegram-style Radio Indicator
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isSelected
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.outlineVariant,
-                                width: 2,
-                              ),
-                            ),
-                            child: isSelected
-                                ? const Center(
-                                    child: Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 12,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

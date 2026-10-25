@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'src/models/chameleon_icon_definition.dart';
 import 'src/platform/chameleon_icons_platform_interface.dart';
 export 'src/models/chameleon_icon_definition.dart';
@@ -6,27 +7,20 @@ export 'src/models/chameleon_icon_definition.dart';
 ///
 /// Use [ChameleonIcons] to dynamically change, reset, and inspect app launcher
 /// icons at runtime across Android and iOS.
-///
-/// Example:
-/// ```dart
-/// final chameleon = ChameleonIcons();
-///
-/// // Check if alternate icons are supported on this device:
-/// if (await chameleon.isAlternateIconsSupported()) {
-///   // Change to a dark icon:
-///   await chameleon.changeIcon("MainActivityDark");
-///
-///   // Reset back to default primary icon:
-///   await chameleon.resetIcon();
-///
-///   // Check currently active icon:
-///   final active = await chameleon.getCurrentIcon();
-///   print('Active icon: $active');
-/// }
-/// ```
 class ChameleonIcons {
-  /// Constructs a [ChameleonIcons] instance.
-  const ChameleonIcons();
+  static final ChameleonIcons _instance = ChameleonIcons._internal();
+
+  /// Returns the singleton [ChameleonIcons] instance.
+  factory ChameleonIcons() => _instance;
+
+  ChameleonIcons._internal();
+
+  /// A [ValueNotifier] holding the currently active icon definition.
+  ///
+  /// Can be bound directly to a `ValueListenableBuilder` in UI without requiring
+  /// manual `initState` fetching or local state variables.
+  final ValueNotifier<ChameleonIconDefinition?> activeIconNotifier =
+      ValueNotifier<ChameleonIconDefinition?>(null);
 
   /// Returns the current host operating system version string.
   Future<String?> getPlatformVersion() {
@@ -37,19 +31,11 @@ class ChameleonIcons {
   ///
   /// On iOS, this checks `UIApplication.shared.supportsAlternateIcons`.
   /// On Android, this checks if the default icon metadata is configured in `AndroidManifest.xml`.
-  ///
-  /// Returns `true` if alternate icons can be changed, or `false` otherwise.
   Future<bool> isAlternateIconsSupported() {
     return ChameleonIconsPlatform.instance.isAlternateIconsSupported();
   }
 
   /// Dynamically changes the app launcher icon to [targetIconClassName].
-  ///
-  /// - On Android: Enables the corresponding `<activity-alias>` and disables
-  ///   other launcher aliases.
-  /// - On iOS: Calls `UIApplication.shared.setAlternateIconName([targetIconClassName])`.
-  ///
-  /// Throws a `PlatformException` if the operation fails or is unsupported.
   Future<void> changeIcon(String targetIconClassName) {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
   }
@@ -57,11 +43,14 @@ class ChameleonIcons {
   /// Changes or resets the app launcher icon using a [ChameleonIconDefinition].
   ///
   /// If [icon.isDefault] is true, calls [resetIcon]. Otherwise, calls [changeIcon].
-  Future<void> setIcon(ChameleonIconDefinition icon) {
+  /// Updates [activeIconNotifier] automatically.
+  Future<void> setIcon(ChameleonIconDefinition icon) async {
     if (icon.isDefault) {
-      return resetIcon();
+      await resetIcon();
+    } else {
+      await changeIcon(icon.id);
     }
-    return changeIcon(icon.id);
+    activeIconNotifier.value = icon;
   }
 
   /// Checks if the default primary icon is currently active.
@@ -71,24 +60,36 @@ class ChameleonIcons {
   }
 
   /// Retrieves the identifier of the currently active app launcher icon.
-  ///
-  /// - On Android: Returns the simple class name of the enabled activity alias
-  ///   (e.g. `"MainActivityDark"` or `"MainActivityDefault"`).
-  /// - On iOS: Returns the active alternate icon name, or dynamically extracts
-  ///   the primary icon name from `Info.plist` (e.g. `"AppIcon"`).
-  ///
-  /// Returns a non-null [String] representing the active icon name.
   Future<String> getCurrentIcon() {
     return ChameleonIconsPlatform.instance.getCurrentIcon();
   }
 
+  /// Automatically resolves and returns the currently active [ChameleonIconDefinition]
+  /// from the provided [icons] list (typically `ChameleonGeneratedIcons.all`).
+  ///
+  /// Also synchronizes [activeIconNotifier].
+  Future<ChameleonIconDefinition> getActiveIcon(List<ChameleonIconDefinition> icons) async {
+    final activeName = await getCurrentIcon();
+    final matched = icons.firstWhere(
+      (icon) => icon.matches(activeName),
+      orElse: () => icons.firstWhere(
+        (icon) => icon.isDefault,
+        orElse: () => icons.first,
+      ),
+    );
+    activeIconNotifier.value = matched;
+    return matched;
+  }
+
+  /// Initializes and listens to the active icon from [icons].
+  ///
+  /// Safe to call on app startup or widget initialization.
+  Future<ChameleonIconDefinition> initialize(List<ChameleonIconDefinition> icons) {
+    return getActiveIcon(icons);
+  }
+
   /// Resets the app launcher icon back to the primary default icon.
-  ///
-  /// - On Android: Re-enables the default `<activity-alias>` and disables alternates.
-  /// - On iOS: Calls `UIApplication.shared.setAlternateIconName(nil)` to restore `CFBundlePrimaryIcon`.
-  ///
-  /// Throws a `PlatformException` if the operation fails or is unsupported.
-  Future<void> resetIcon() {
-    return ChameleonIconsPlatform.instance.resetIcon();
+  Future<void> resetIcon() async {
+    await ChameleonIconsPlatform.instance.resetIcon();
   }
 }
