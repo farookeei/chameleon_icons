@@ -12,6 +12,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:chameleon_icons/src/config/chameleon_config.dart';
+import 'package:chameleon_icons/src/generator/dart_code_generator.dart';
 import 'package:chameleon_icons/src/injector/android_manifest_injector.dart';
 import 'package:chameleon_icons/src/injector/ios_plist_injector.dart';
 import 'package:chameleon_icons/src/processor/image_processor.dart';
@@ -92,8 +93,16 @@ void main(List<String> arguments) {
       iosInjector.inject();
     }
 
+    // 4. Generate typed Dart code (lib/chameleon_icons.g.dart)
+    final dartGen = DartCodeGenerator(
+      config: config,
+      projectRoot: projectRoot,
+    );
+    final generatedFile = dartGen.generate();
+    print('  ✓ [Dart] Generated typed icons: ${generatedFile.path}');
+
     print(
-      '\n [chameleon_icons] Full setup complete! All images generated and native configs injected.',
+      '\n [chameleon_icons] Full setup complete! All images generated, native configs injected, and Dart code generated.',
     );
   } on FormatException catch (e) {
     stderr.writeln('❌ Invalid CLI argument: ${e.message}');
@@ -107,6 +116,9 @@ void main(List<String> arguments) {
     exit(1);
   } on ChameleonInjectionException catch (e) {
     stderr.writeln('❌ Native Injection Error: ${e.message}');
+    exit(1);
+  } on ChameleonGeneratorException catch (e) {
+    stderr.writeln('❌ Code Generation Error: ${e.message}');
     exit(1);
   } catch (e, st) {
     stderr.writeln('❌ Unexpected error: $e');

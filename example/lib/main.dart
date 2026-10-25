@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chameleon_icons/chameleon_icons.dart';
+import 'chameleon_icons.g.dart';
 
 void main() {
   runApp(const MyApp());
-}
-
-class AppIconOption {
-  final String id;
-  final String name;
-  final String assetPath;
-  final bool isDefault;
-
-  const AppIconOption({
-    required this.id,
-    required this.name,
-    required this.assetPath,
-    this.isDefault = false,
-  });
 }
 
 class MyApp extends StatelessWidget {
@@ -60,27 +47,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
   bool _isLoading = false;
   final _chameleonIcons = ChameleonIcons();
 
-  final List<AppIconOption> _icons = const [
-    AppIconOption(
-      id: 'MainActivityDefault',
-      name: 'Default Classic',
-
-      assetPath: 'assets/icons/default.png',
-      isDefault: true,
-    ),
-    AppIconOption(
-      id: 'MainActivityDark',
-      name: 'Midnight Dark',
-
-      assetPath: 'assets/icons/dark.png',
-    ),
-    AppIconOption(
-      id: 'MainActivityGold',
-      name: 'Luxury Gold',
-
-      assetPath: 'assets/icons/gold.png',
-    ),
-  ];
+  final List<ChameleonIconDefinition> _icons = ChameleonGeneratedIcons.all;
 
   @override
   void initState() {
@@ -105,7 +72,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     });
   }
 
-  bool _isIconSelected(AppIconOption icon) {
+  bool _isIconSelected(ChameleonIconDefinition icon) {
     if (icon.isDefault) {
       // On iOS: AppIcon or MainActivityDefault
       // On Android: MainActivityDefault
@@ -116,7 +83,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     return _currentIcon == icon.id;
   }
 
-  Future<void> _selectIcon(AppIconOption icon) async {
+  Future<void> _selectIcon(ChameleonIconDefinition icon) async {
     if (_isIconSelected(icon) || _isLoading) return;
 
     setState(() => _isLoading = true);
@@ -138,7 +105,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('App icon changed to "${icon.name}"'),
+          content: Text('App icon changed to "${icon.label}"'),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
@@ -339,7 +306,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
 
                           // Icon Label
                           Text(
-                            iconOption.name,
+                            iconOption.label,
                             style: theme.textTheme.labelMedium?.copyWith(
                               fontWeight: isSelected
                                   ? FontWeight.bold
