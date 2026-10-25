@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chameleon_icons/chameleon_icons.dart';
 import 'package:chameleon_icons/src/config/chameleon_config.dart';
 import 'package:chameleon_icons/src/generator/dart_code_generator.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,6 +91,37 @@ void main() {
       expect(file.existsSync(), isTrue);
       expect(file.readAsStringSync(), contains('class ChameleonGeneratedIcons'));
       expect(file.path, equals('${tempDir.path}/lib/chameleon_icons.g.dart'));
+    });
+
+    test('ChameleonIconDefinition matches correctly handles default and alternate icons', () {
+      const defaultIcon = ChameleonIconDefinition(
+        key: 'default',
+        id: 'MainActivityDefault',
+        label: 'Default',
+        assetPath: 'assets/default.png',
+        isDefault: true,
+      );
+
+      const altIcon = ChameleonIconDefinition(
+        key: 'dark',
+        id: 'MainActivityDark',
+        label: 'Dark',
+        assetPath: 'assets/dark.png',
+        isDefault: false,
+      );
+
+      // Default icon matches on Android ID, iOS AppIcon, or empty string
+      expect(defaultIcon.matches('MainActivityDefault'), isTrue);
+      expect(defaultIcon.matches('AppIcon'), isTrue);
+      expect(defaultIcon.matches(''), isTrue);
+      expect(defaultIcon.matches('MainActivityDark'), isFalse);
+      expect(defaultIcon.matches(null), isFalse);
+
+      // Alternate icon matches only its specific ID
+      expect(altIcon.matches('MainActivityDark'), isTrue);
+      expect(altIcon.matches('MainActivityDefault'), isFalse);
+      expect(altIcon.matches('AppIcon'), isFalse);
+      expect(altIcon.matches(''), isFalse);
     });
   });
 }

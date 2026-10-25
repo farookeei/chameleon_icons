@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chameleon_icons/chameleon_icons.dart';
+
 import 'chameleon_icons.g.dart';
 
 void main() {
@@ -73,27 +74,16 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
   }
 
   bool _isIconSelected(ChameleonIconDefinition icon) {
-    if (icon.isDefault) {
-      // On iOS: AppIcon or MainActivityDefault
-      // On Android: MainActivityDefault
-      return _currentIcon == 'MainActivityDefault' ||
-          _currentIcon == 'AppIcon' ||
-          _currentIcon.isEmpty;
-    }
-    return _currentIcon == icon.id;
+    return icon.matches(_currentIcon);
   }
 
   Future<void> _selectIcon(ChameleonIconDefinition icon) async {
-    if (_isIconSelected(icon) || _isLoading) return;
+    if (icon.matches(_currentIcon) || _isLoading) return;
 
     setState(() => _isLoading = true);
 
     try {
-      if (icon.isDefault) {
-        await _chameleonIcons.resetIcon();
-      } else {
-        await _chameleonIcons.changeIcon(icon.id);
-      }
+      await _chameleonIcons.setIcon(icon);
 
       final updatedIcon = await _chameleonIcons.getCurrentIcon();
 
@@ -168,7 +158,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Active: ${_currentIcon.isEmpty ? "Default" : _currentIcon}',
+                          'Active: ${_icons.firstWhere((i) => i.matches(_currentIcon), orElse: () => ChameleonGeneratedIcons.defaultIcon).label}',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

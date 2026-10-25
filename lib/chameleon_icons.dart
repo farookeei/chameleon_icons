@@ -1,3 +1,4 @@
+import 'src/models/chameleon_icon_definition.dart';
 import 'src/platform/chameleon_icons_platform_interface.dart';
 export 'src/models/chameleon_icon_definition.dart';
 
@@ -51,6 +52,22 @@ class ChameleonIcons {
   /// Throws a `PlatformException` if the operation fails or is unsupported.
   Future<void> changeIcon(String targetIconClassName) {
     return ChameleonIconsPlatform.instance.changeIcon(targetIconClassName);
+  }
+
+  /// Changes or resets the app launcher icon using a [ChameleonIconDefinition].
+  ///
+  /// If [icon.isDefault] is true, calls [resetIcon]. Otherwise, calls [changeIcon].
+  Future<void> setIcon(ChameleonIconDefinition icon) {
+    if (icon.isDefault) {
+      return resetIcon();
+    }
+    return changeIcon(icon.id);
+  }
+
+  /// Checks if the default primary icon is currently active.
+  Future<bool> isDefaultIcon() async {
+    final active = await getCurrentIcon();
+    return active == 'MainActivityDefault' || active == 'AppIcon' || active.isEmpty;
   }
 
   /// Retrieves the identifier of the currently active app launcher icon.

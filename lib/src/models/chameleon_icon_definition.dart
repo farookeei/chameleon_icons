@@ -25,6 +25,21 @@ class ChameleonIconDefinition {
     this.isDefault = false,
   });
 
+  /// Checks whether this icon definition matches the currently active icon name
+  /// returned by [ChameleonIcons.getCurrentIcon].
+  ///
+  /// Seamlessly handles cross-platform default identifiers (e.g. `'MainActivityDefault'`,
+  /// `'AppIcon'`, or empty string on iOS).
+  bool matches(String? currentActiveIconName) {
+    if (currentActiveIconName == null) return false;
+    if (isDefault) {
+      return currentActiveIconName == id ||
+          currentActiveIconName == 'AppIcon' ||
+          currentActiveIconName.isEmpty;
+    }
+    return currentActiveIconName == id;
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
