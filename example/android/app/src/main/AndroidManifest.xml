@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:label="chameleon_icons_example"
         android:name="${applicationName}"
@@ -21,6 +22,13 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Only for the Flutter tool: `flutter run` reads this source manifest to find the
+                 launch activity and ignores <activity-alias>. The merger strips this filter so
+                 the launcher icon is only provided by the chameleon_icons aliases below. -->
+            <intent-filter tools:node="remove">
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
 
         <!-- [chameleon_icons:start] -->

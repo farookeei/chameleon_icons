@@ -1,3 +1,20 @@
+## 0.2.0
+
+* **Type-Safe Icon Generation (`chameleon_icons.g.dart`)**:
+  * Running `dart run chameleon_icons:generate` now automatically outputs `lib/chameleon_icons.g.dart` containing strongly-typed `ChameleonGeneratedIcons` (`defaultIcon`, individual alternates, `alternateIcons`, and `all`).
+  * Added `ChameleonIconDefinition` model encapsulating `key`, `id`, `label`, `assetPath`, and `isDefault`.
+  * Added `ChameleonIconDefinition.matches(activeIconName)` to cleanly resolve cross-platform active icon identifiers (Android alias, iOS `AppIcon`, or empty defaults) without hardcoding strings in UI.
+* **Declarative & Reactive State Management**:
+  * Added `ChameleonIcons.activeIconNotifier`: a `ValueNotifier<ChameleonIconDefinition?>` that can be directly bound to Flutter's `ValueListenableBuilder`.
+  * Added `setIcon(ChameleonIconDefinition icon)` to switch or reset the icon and immediately synchronize `activeIconNotifier`.
+  * Added `getActiveIcon(List<ChameleonIconDefinition> icons)` and `initialize(icons)` to resolve and broadcast the active icon without manual `initState` boilerplate.
+  * Added `isDefaultIcon()` convenience check.
+* **Android Manifest Launcher Resolution Fix**:
+  * Resolved `package identifier or launch activity not found` during clean `flutter run` invocations caused by Flutter tooling ignoring `<activity-alias>` when inspecting source manifests before an APK is built.
+  * The injector now adds `xmlns:tools` to `<manifest>` and injects a `tools:node="remove"` launcher `<intent-filter>` on `.MainActivity` so Flutter tools detect the launch activity while the Android Gradle manifest merger cleanly strips it from the final APK.
+* **Refactored Example App**:
+  * Migrated the example app to consume `ChameleonGeneratedIcons.all` and `activeIconNotifier` with a clean, zero-boilerplate Telegram-style icon picker.
+
 ## 0.1.0
 
 * **Automated CLI Generator (`dart run chameleon_icons:generate`)**:

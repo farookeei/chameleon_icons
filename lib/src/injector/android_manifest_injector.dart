@@ -104,6 +104,13 @@ class AndroidManifestInjector {
       );
     }
 
+    // Keep `flutter run` working when no APK has been built yet (see method docs).
+    // Runs on every invocation so manifests injected by older versions get upgraded too.
+    modifiedContent = _ensureFlutterToolLaunchStub(
+      modifiedContent,
+      targetActivityName,
+    );
+
     // 4. Post-flight verification: ensure result is 100% valid XML before writing
     try {
       XmlDocument.parse(modifiedContent);
@@ -203,6 +210,64 @@ class AndroidManifestInjector {
       );
       return '$openingTag$inner$closingTag';
     });
+  }
+
+  /// Ensures the main activity carries a launcher intent-filter marked
+  /// `tools:node="remove"`, and that the `tools` namespace is declared.
+  ///
+  /// Why: when no APK has been built yet, `flutter run` reads the *source*
+  /// manifest to find the launch activity. It only inspects `<activity>`
+  /// elements and ignores `<activity-alias>`. Since the launcher filter lives on
+  /// the aliases, Flutter would fail with "package identifier or launch
+  /// activity not found". This stub gives Flutter something to find, and the
+  /// Android manifest merger strips it from the built app, so no duplicate
+  /// launcher icon appears.
+  String _ensureFlutterToolLaunchStub(String content, String activityName) {
+    final activityBlockRegex = RegExp(
+      r'(<activity[^>]*android:name="' +
+          RegExp.escape(activityName) +
+          r'"[^>]*>)([\s\S]*?)(</activity>)',
+      multiLine: true,
+    );
+    final match = activityBlockRegex.firstMatch(content);
+    // Self-closing or missing activity: nothing safe to modify.
+    if (match == null || match.group(1)!.endsWith('/>')) {
+      return content;
+    }
+
+    final stubRegex = RegExp(r'<intent-filter[^>]*tools:node\s*=\s*"remove"');
+    var result = content;
+    if (!stubRegex.hasMatch(match.group(2)!)) {
+      result = content.replaceRange(
+        match.start,
+        match.end,
+        '${match.group(1)}${match.group(2)!.trimRight()}\n'
+        '            <!-- [chameleon_icons] Lets `flutter run` find a launch activity when no APK exists yet. Removed from the built app by the manifest merger. -->\n'
+        '            <intent-filter tools:node="remove">\n'
+        '                <action android:name="android.intent.action.MAIN" />\n'
+        '                <category android:name="android.intent.category.LAUNCHER" />\n'
+        '            </intent-filter>\n'
+        '        ${match.group(3)}',
+      );
+    }
+
+    return _ensureToolsNamespace(result);
+  }
+
+  /// Declares `xmlns:tools` on the root `<manifest>` element if it is missing.
+  String _ensureToolsNamespace(String content) {
+    final manifestTag = RegExp(r'<manifest\b[^>]*>').firstMatch(content);
+    if (manifestTag == null) return content;
+    final tag = manifestTag.group(0)!;
+    if (tag.contains('xmlns:tools=')) return content;
+
+    final selfClosing = tag.endsWith('/>');
+    final head = tag
+        .substring(0, tag.length - (selfClosing ? 2 : 1))
+        .trimRight();
+    final patched =
+        '$head\n    xmlns:tools="http://schemas.android.com/tools"${selfClosing ? '/>' : '>'}';
+    return content.replaceRange(manifestTag.start, manifestTag.end, patched);
   }
 
   /// Builds the XML block containing the default metadata and all activity-aliases.

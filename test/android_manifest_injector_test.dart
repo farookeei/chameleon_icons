@@ -64,92 +64,89 @@ void main() {
       ],
     );
 
-    test(
-      'injects metadata and activity aliases into a fresh AndroidManifest.xml',
-      () {
-        final injector = AndroidManifestInjector(
-          config: testConfig,
-          projectRoot: tempDir.path,
-        );
+    test('injects metadata and activity aliases into a fresh AndroidManifest.xml', () {
+      final injector = AndroidManifestInjector(
+        config: testConfig,
+        projectRoot: tempDir.path,
+      );
 
-        injector.inject();
+      injector.inject();
 
-        final updatedContent = manifestFile.readAsStringSync();
+      final updatedContent = manifestFile.readAsStringSync();
 
-        // Ensure valid XML
-        final doc = XmlDocument.parse(updatedContent);
+      // Ensure valid XML
+      final doc = XmlDocument.parse(updatedContent);
 
-        // Verify launcher intent filter is removed from MainActivity
-        final mainActivity = doc.findAllElements('activity').first;
-        final launcherCategory = mainActivity
-            .findAllElements('category')
-            .where(
-              (cat) =>
-                  cat.getAttribute('android:name') ==
-                  'android.intent.category.LAUNCHER',
-            );
-        expect(launcherCategory, isEmpty);
+      // Verify no *effective* launcher filter remains on MainActivity.
+      // The only one left is the tools:node="remove" stub for the Flutter tool.
+      final mainActivity = doc.findAllElements('activity').first;
+      final effectiveFilters = mainActivity
+          .findElements('intent-filter')
+          .where((f) => f.getAttribute('tools:node') != 'remove')
+          .expand((f) => f.findElements('category'))
+          .where(
+            (cat) =>
+                cat.getAttribute('android:name') ==
+                'android.intent.category.LAUNCHER',
+          );
+      expect(effectiveFilters, isEmpty);
 
-        // Verify metadata exists
-        final metadata = doc
-            .findAllElements('meta-data')
-            .where(
-              (m) =>
-                  m.getAttribute('android:name') ==
-                  AndroidManifestInjector.defaultAliasMetadata,
-            );
-        expect(metadata.length, 1);
-        expect(
-          metadata.first.getAttribute('android:value'),
-          'MainActivityDefault',
-        );
+      // Verify metadata exists
+      final metadata = doc
+          .findAllElements('meta-data')
+          .where(
+            (m) =>
+                m.getAttribute('android:name') ==
+                AndroidManifestInjector.defaultAliasMetadata,
+          );
+      expect(metadata.length, 1);
+      expect(
+        metadata.first.getAttribute('android:value'),
+        'MainActivityDefault',
+      );
 
-        // Verify activity aliases
-        final aliases = doc.findAllElements('activity-alias').toList();
-        expect(aliases.length, 3);
+      // Verify activity aliases
+      final aliases = doc.findAllElements('activity-alias').toList();
+      expect(aliases.length, 3);
 
-        final defaultAlias = aliases.firstWhere(
-          (a) => a.getAttribute('android:name') == '.MainActivityDefault',
-        );
-        expect(defaultAlias.getAttribute('android:enabled'), 'true');
-        expect(
-          defaultAlias.getAttribute('android:icon'),
-          '@mipmap/ic_launcher',
-        );
-        expect(
-          defaultAlias.getAttribute('android:targetActivity'),
-          '.MainActivity',
-        );
+      final defaultAlias = aliases.firstWhere(
+        (a) => a.getAttribute('android:name') == '.MainActivityDefault',
+      );
+      expect(defaultAlias.getAttribute('android:enabled'), 'true');
+      expect(defaultAlias.getAttribute('android:icon'), '@mipmap/ic_launcher');
+      expect(
+        defaultAlias.getAttribute('android:targetActivity'),
+        '.MainActivity',
+      );
 
-        final darkAlias = aliases.firstWhere(
-          (a) => a.getAttribute('android:name') == '.MainActivityDark',
-        );
-        expect(darkAlias.getAttribute('android:enabled'), 'false');
-        expect(
-          darkAlias.getAttribute('android:icon'),
-          '@mipmap/ic_launcher_dark',
-        );
+      final darkAlias = aliases.firstWhere(
+        (a) => a.getAttribute('android:name') == '.MainActivityDark',
+      );
+      expect(darkAlias.getAttribute('android:enabled'), 'false');
+      expect(
+        darkAlias.getAttribute('android:icon'),
+        '@mipmap/ic_launcher_dark',
+      );
 
-        final goldAlias = aliases.firstWhere(
-          (a) => a.getAttribute('android:name') == '.MainActivityGold',
-        );
-        expect(goldAlias.getAttribute('android:enabled'), 'false');
-        expect(
-          goldAlias.getAttribute('android:icon'),
-          '@mipmap/ic_launcher_gold',
-        );
+      final goldAlias = aliases.firstWhere(
+        (a) => a.getAttribute('android:name') == '.MainActivityGold',
+      );
+      expect(goldAlias.getAttribute('android:enabled'), 'false');
+      expect(
+        goldAlias.getAttribute('android:icon'),
+        '@mipmap/ic_launcher_gold',
+      );
 
-        // Verify markers exist
-        expect(
-          updatedContent.contains(AndroidManifestInjector.startMarker),
-          isTrue,
-        );
-        expect(
-          updatedContent.contains(AndroidManifestInjector.endMarker),
-          isTrue,
-        );
-      },
-    );
+      // Verify markers exist
+      expect(
+        updatedContent.contains(AndroidManifestInjector.startMarker),
+        isTrue,
+      );
+      expect(
+        updatedContent.contains(AndroidManifestInjector.endMarker),
+        isTrue,
+      );
+    });
 
     test('is strictly idempotent: running multiple times produces identical output without duplicate tags', () {
       final injector = AndroidManifestInjector(
@@ -186,6 +183,87 @@ void main() {
             .length,
         1,
       );
+    });
+
+    test('adds a tools:node="remove" launcher stub and xmlns:tools so flutter run can find the launch activity', () {
+      AndroidManifestInjector(
+        config: testConfig,
+        projectRoot: tempDir.path,
+      ).inject();
+
+      final content = manifestFile.readAsStringSync();
+      final doc = XmlDocument.parse(content);
+
+      expect(
+        doc.rootElement.getAttribute('xmlns:tools'),
+        'http://schemas.android.com/tools',
+      );
+
+      final mainActivity = doc.findAllElements('activity').first;
+      final stubs = mainActivity
+          .findElements('intent-filter')
+          .where((f) => f.getAttribute('tools:node') == 'remove');
+      expect(stubs.length, 1);
+      expect(
+        stubs.first
+            .findElements('category')
+            .any(
+              (c) =>
+                  c.getAttribute('android:name') ==
+                  'android.intent.category.LAUNCHER',
+            ),
+        isTrue,
+      );
+    });
+
+    test('upgrades a manifest injected by an older version (markers present, no stub)', () {
+      final injector = AndroidManifestInjector(
+        config: testConfig,
+        projectRoot: tempDir.path,
+      );
+      injector.inject();
+
+      // Simulate an old injection: strip the stub and the namespace.
+      var old = manifestFile.readAsStringSync();
+      old = old.replaceAll(
+        RegExp(r'\s*<!-- \[chameleon_icons\] Lets[\s\S]*?</intent-filter>'),
+        '',
+      );
+      old = old.replaceAll(RegExp(r'\s*xmlns:tools="[^"]*"'), '');
+      manifestFile.writeAsStringSync(old);
+      expect(old.contains('tools:node'), isFalse);
+      expect(old.contains('xmlns:tools'), isFalse);
+
+      injector.inject();
+      final upgraded = manifestFile.readAsStringSync();
+      final doc = XmlDocument.parse(upgraded);
+      expect(doc.rootElement.getAttribute('xmlns:tools'), isNotNull);
+      expect(
+        doc
+            .findAllElements('intent-filter')
+            .where((f) => f.getAttribute('tools:node') == 'remove')
+            .length,
+        1,
+      );
+      expect(doc.findAllElements('activity-alias').length, 3);
+    });
+
+    test('does not duplicate an existing xmlns:tools declaration', () {
+      manifestFile.writeAsStringSync(
+        sampleManifest.replaceFirst(
+          '<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+          '<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">',
+        ),
+      );
+
+      AndroidManifestInjector(
+        config: testConfig,
+        projectRoot: tempDir.path,
+      ).inject();
+
+      final content = manifestFile.readAsStringSync();
+      expect('xmlns:tools='.allMatches(content).length, 1);
+      XmlDocument.parse(content); // still valid
     });
 
     test('dynamically updates aliases when configuration changes', () {
