@@ -94,10 +94,7 @@ void main(List<String> arguments) {
     }
 
     // 4. Generate typed Dart code (lib/chameleon_icons.g.dart)
-    final dartGen = DartCodeGenerator(
-      config: config,
-      projectRoot: projectRoot,
-    );
+    final dartGen = DartCodeGenerator(config: config, projectRoot: projectRoot);
     final generatedFile = dartGen.generate();
     print('  ✓ [Dart] Generated typed icons: ${generatedFile.path}');
 

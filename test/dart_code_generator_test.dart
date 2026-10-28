@@ -11,7 +11,9 @@ void main() {
     late ChameleonConfig sampleConfig;
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('chameleon_generator_test_');
+      tempDir = Directory.systemTemp.createTempSync(
+        'chameleon_generator_test_',
+      );
 
       sampleConfig = const ChameleonConfig(
         defaultIcon: IconConfig(
@@ -43,41 +45,58 @@ void main() {
       }
     });
 
-    test('generateCode produces valid Dart code containing typed definitions', () {
-      final generator = DartCodeGenerator(
-        config: sampleConfig,
-        projectRoot: tempDir.path,
-      );
+    test(
+      'generateCode produces valid Dart code containing typed definitions',
+      () {
+        final generator = DartCodeGenerator(
+          config: sampleConfig,
+          projectRoot: tempDir.path,
+        );
 
-      final code = generator.generateCode();
+        final code = generator.generateCode();
 
-      expect(code, contains('class ChameleonGeneratedIcons'));
-      expect(code, contains('static const defaultIcon = ChameleonIconDefinition('));
-      expect(code, contains("key: 'default'"));
-      expect(code, contains("id: 'MainActivityDefault'"));
-      expect(code, contains("label: 'Default'"));
-      expect(code, contains("assetPath: 'assets/icons/default.png'"));
-      expect(code, contains('isDefault: true'));
+        expect(code, contains('class ChameleonGeneratedIcons'));
+        expect(
+          code,
+          contains('static const defaultIcon = ChameleonIconDefinition('),
+        );
+        expect(code, contains("key: 'default'"));
+        expect(code, contains("id: 'MainActivityDefault'"));
+        expect(code, contains("label: 'Default'"));
+        expect(code, contains("assetPath: 'assets/icons/default.png'"));
+        expect(code, contains('isDefault: true'));
 
-      expect(code, contains('static const dark = ChameleonIconDefinition('));
-      expect(code, contains("key: 'dark'"));
-      expect(code, contains("id: 'MainActivityDark'"));
-      expect(code, contains("label: 'Dark'"));
-      expect(code, contains("assetPath: 'assets/icons/dark.png'"));
+        expect(code, contains('static const dark = ChameleonIconDefinition('));
+        expect(code, contains("key: 'dark'"));
+        expect(code, contains("id: 'MainActivityDark'"));
+        expect(code, contains("label: 'Dark'"));
+        expect(code, contains("assetPath: 'assets/icons/dark.png'"));
 
-      expect(code, contains('static const luxuryGold = ChameleonIconDefinition('));
-      expect(code, contains("key: 'luxury_gold'"));
-      expect(code, contains("id: 'MainActivityGold'"));
-      expect(code, contains("label: 'Luxury Gold'"));
-      expect(code, contains("assetPath: 'assets/icons/gold.png'"));
+        expect(
+          code,
+          contains('static const luxuryGold = ChameleonIconDefinition('),
+        );
+        expect(code, contains("key: 'luxury_gold'"));
+        expect(code, contains("id: 'MainActivityGold'"));
+        expect(code, contains("label: 'Luxury Gold'"));
+        expect(code, contains("assetPath: 'assets/icons/gold.png'"));
 
-      expect(code, contains('static const List<ChameleonIconDefinition> alternateIcons = ['));
-      expect(code, contains('dark,'));
-      expect(code, contains('luxuryGold,'));
+        expect(
+          code,
+          contains(
+            'static const List<ChameleonIconDefinition> alternateIcons = [',
+          ),
+        );
+        expect(code, contains('dark,'));
+        expect(code, contains('luxuryGold,'));
 
-      expect(code, contains('static const List<ChameleonIconDefinition> all = ['));
-      expect(code, contains('defaultIcon,'));
-    });
+        expect(
+          code,
+          contains('static const List<ChameleonIconDefinition> all = ['),
+        );
+        expect(code, contains('defaultIcon,'));
+      },
+    );
 
     test('generate writes output file to designated path', () {
       final generator = DartCodeGenerator(
@@ -89,7 +108,10 @@ void main() {
       final file = generator.generate();
 
       expect(file.existsSync(), isTrue);
-      expect(file.readAsStringSync(), contains('class ChameleonGeneratedIcons'));
+      expect(
+        file.readAsStringSync(),
+        contains('class ChameleonGeneratedIcons'),
+      );
       expect(file.path, equals('${tempDir.path}/lib/chameleon_icons.g.dart'));
     });
 

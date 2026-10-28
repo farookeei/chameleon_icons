@@ -35,15 +35,8 @@ class ChameleonGeneratedIcons {
   );
 
   /// List of all alternate icon definitions.
-  static const List<ChameleonIconDefinition> alternateIcons = [
-    dark,
-    gold,
-  ];
+  static const List<ChameleonIconDefinition> alternateIcons = [dark, gold];
 
   /// List of all configured icon definitions, starting with the default icon.
-  static const List<ChameleonIconDefinition> all = [
-    defaultIcon,
-    dark,
-    gold,
-  ];
+  static const List<ChameleonIconDefinition> all = [defaultIcon, dark, gold];
 }

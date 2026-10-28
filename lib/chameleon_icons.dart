@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'src/models/chameleon_icon_definition.dart';
 import 'src/platform/chameleon_icons_platform_interface.dart';
 export 'src/models/chameleon_icon_definition.dart';
@@ -56,7 +57,9 @@ class ChameleonIcons {
   /// Checks if the default primary icon is currently active.
   Future<bool> isDefaultIcon() async {
     final active = await getCurrentIcon();
-    return active == 'MainActivityDefault' || active == 'AppIcon' || active.isEmpty;
+    return active == 'MainActivityDefault' ||
+        active == 'AppIcon' ||
+        active.isEmpty;
   }
 
   /// Retrieves the identifier of the currently active app launcher icon.
@@ -68,14 +71,14 @@ class ChameleonIcons {
   /// from the provided [icons] list (typically `ChameleonGeneratedIcons.all`).
   ///
   /// Also synchronizes [activeIconNotifier].
-  Future<ChameleonIconDefinition> getActiveIcon(List<ChameleonIconDefinition> icons) async {
+  Future<ChameleonIconDefinition> getActiveIcon(
+    List<ChameleonIconDefinition> icons,
+  ) async {
     final activeName = await getCurrentIcon();
     final matched = icons.firstWhere(
       (icon) => icon.matches(activeName),
-      orElse: () => icons.firstWhere(
-        (icon) => icon.isDefault,
-        orElse: () => icons.first,
-      ),
+      orElse: () =>
+          icons.firstWhere((icon) => icon.isDefault, orElse: () => icons.first),
     );
     activeIconNotifier.value = matched;
     return matched;
@@ -84,7 +87,9 @@ class ChameleonIcons {
   /// Initializes and listens to the active icon from [icons].
   ///
   /// Safe to call on app startup or widget initialization.
-  Future<ChameleonIconDefinition> initialize(List<ChameleonIconDefinition> icons) {
+  Future<ChameleonIconDefinition> initialize(
+    List<ChameleonIconDefinition> icons,
+  ) {
     return getActiveIcon(icons);
   }
 
